@@ -18,11 +18,11 @@ class Graph {
         Graph(int order);  //~ Constructor;
         ~Graph();          //~ Destructor;
 
-        Node *getNode(int id);                                 //~ Retorna um nó pelo seu id;
-        void insertNode(int id);                               //~ Insere novo nó;
-        void insertEdge(int id, int target_id, float weight);  //~ Insere nova aresta;
-        void removeNode(int id);                               //~ Remove nó pelo seu id;
-        bool searchNode(int id);                               //~ Verifica se nó existe;
+        Node *get_node(int id);                                         //~ Retorna um nó pelo seu id;
+        void insert_node(int id, char type, int points, int x, int y);  //~ Insere novo nó;
+        void insert_edge(int id, int target_id, float dist);          //~ Insere nova aresta;
+        void remove_node(int id);                                       //~ Remove nó pelo seu id;
+        bool search_node(int id);                                       //~ Verifica se nó existe;
 };
 
 
