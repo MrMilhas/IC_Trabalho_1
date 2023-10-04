@@ -84,4 +84,50 @@ void Graph::insert_edge(int id, int target_id, float dist){
     }
 }
 
+/**
+ * @brief     Função utilizada para remover um nó do grafo pelo seu Id;
+ * 
+ * @param id  Id do nó a ser removido;
+ */
+void Graph::remove_node(int id){
+    Node *node = get_node(id);
 
+    if (node == nullptr){
+        return;
+    }
+    else if (node == first_node){
+        first_node = node->next_node;
+    }
+    else{
+        Node *aux = first_node;
+
+        while (aux->next_node != node){
+            aux = aux->next_node;
+        }
+
+        if (node == last_node){
+            last_node = aux;
+        }
+
+        aux->next_node = node->next_node;
+    }
+    delete node;
+}
+
+/**
+ * @brief         Função utilizda para procurar uma nó no grafo pelo seu Id;
+ * 
+ * @param id      Id do nó a ser procurado no grafo;
+ * @return true   Retorna verdadeiro se encontrar o nó;
+ * @return false  Retorna falso se não encontrar o nó;
+ */
+bool Graph::search_node(int id){
+    Node *node = get_node(id);
+
+    if (node == nullptr){
+        return false;
+    }
+    else{
+        return true;
+    }
+}
