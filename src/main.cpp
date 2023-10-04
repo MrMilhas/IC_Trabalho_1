@@ -13,6 +13,15 @@
 
 using namespace std;
 
+/**
+ * @brief         Função utilizada para calcular a distância euclidiana entre dois nós; 
+ * 
+ * @param x1      X do nó origem;
+ * @param y1      Y do nó origem;
+ * @param x2      X do nó alvo;
+ * @param y2      Y do nó alvo;
+ * @return float  Retorna a distância euclidiana entre os nós;
+ */
 float euclidian_dist(int x1, int y1, int x2, int y2){
     float x = x1 - x2;
 	float y = y1 - y2;
@@ -24,6 +33,12 @@ float euclidian_dist(int x1, int y1, int x2, int y2){
 	return dist;
 }
 
+/**
+ * @brief           Função utilizada para construir um grafo completo a partir de uma instância;
+ * 
+ * @param instance  Arquivo de entrada contendo a instãncia a ser lida; 
+ * @return Graph*   Retorna o grafo montado;
+ */
 Graph *build_graph(ifstream &instance) {
     string line = "";
     int count_line = 0;
