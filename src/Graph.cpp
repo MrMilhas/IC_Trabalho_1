@@ -1,12 +1,17 @@
 #include "../headers/Graph.h"
 #include "../headers/Node.h"
 #include "../headers/Edge.h"
+#include <iostream>
 
 using namespace std;
 
 //* Constructor and Destructor -------------------------------------------------------------
-Graph::Graph(int order){
+Graph::Graph(int order, int h, int d, int tMax, vector<float> td){
     this->order = order;
+    this->h = h;
+    this->d = d;
+    this->tMax = tMax;
+    this->td = td;
     this->first_node = nullptr;
     this->last_node = nullptr;
 }

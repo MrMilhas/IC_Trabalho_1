@@ -55,7 +55,7 @@ Graph *build_graph(ifstream &instance) {
 
     int count = 0;       //~ Contador auxiliar para os hotéis extras;
 
-    Graph *new_graph = new Graph(n);    //~ Grafo que será montado;
+    Graph *new_graph = new Graph(n, h, d, tMax, td);    //~ Grafo que será montado;
 
     //& Percorre o arquivo de entrada lendo os dados da instância e adicionando os nós no grafo;
     while(!instance.eof()){
@@ -99,13 +99,17 @@ Graph *build_graph(ifstream &instance) {
                 }
                 else{
                     if(count_line == 3){
+                        new_graph->order = n;
+                        new_graph->h = h;
+                        new_graph->d = d;
+                        new_graph->tMax = tMax;
+                        new_graph->td = td;
+                        
                         getline(instance, line);         
                         std::stringstream ss(line);
                         count_line++;
                     }
                     else{
-                        new_graph->order = n;
-
                         if(count_line == 4){
                             getline(instance, line);         
                             std::stringstream ss(line);
@@ -163,15 +167,16 @@ Graph *build_graph(ifstream &instance) {
                                     std::stringstream ss(line);
                                     string aux = "";
 
-                                    getline(ss, aux, '	');
-                                    x = stoi(aux);
-                                    getline(ss, aux, '	');
-                                    y = stoi(aux);
-                                    getline(ss, aux, '\n');
-                                    sI = stoi(aux);
+                                    if(id < n){
+                                        getline(ss, aux, '	');
+                                        x = stoi(aux);
+                                        getline(ss, aux, '	');
+                                        y = stoi(aux);
+                                        getline(ss, aux, '\n');
+                                        sI = stoi(aux);
 
-                                    new_graph->insert_node(id, 'N', sI, x, y);
-                                    
+                                        new_graph->insert_node(id, 'N', sI, x, y);
+                                    }
                                     count_line++;
                                     id++;
                                 }
