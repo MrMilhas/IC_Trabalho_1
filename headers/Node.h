@@ -9,7 +9,7 @@ class Node {
     public:
         //* Atributes ---------------------------------------------------------------
         int id;            //~ Id do nó;
-        char type;         //~ Tipo do nó (H = Hotel, N = Nó);
+        char type;         //~ Tipo do nó (I = Hotel Inicial, F = Hotel Final, H = Hotel, N = Nó);
         int points;        //~ Pontuação do nó (Se for um hotel, points = 0);
         
         int pos_x;         //~ Posição X do nó;
