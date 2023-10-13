@@ -34,6 +34,9 @@ public:
     vector<pair<int, float>> createCandidates();                                                 //~ Cria conjunto de candidatos;
     vector<int> createHotelsCandidates();                                                        //~ Cria conjunto de candidatos de hoteis;
     vector<pair<int, float>> updateCandidates(vector<pair<int, float>> *candidates, Node *node); //~ Atualiza conjunto de candidatos;
+    vector<vector<int>> createNeighborhood(vector<int> solution);
+    int get_total_dist(vector<int> solution);
+    int get_total_points(vector<int> solution);
     vector<vector<int>> heuristic();                                                             //~ Função heurística;
 };
 
