@@ -228,6 +228,44 @@ vector<pair<int, float>> Graph::updateCandidates(vector<pair<int, float>> *candi
     return aux;
 }
 
+vector<vector<int>> Graph::createNeighborhood(vector<int> solution){
+    vector<vector<int>> neighborhood;
+    
+    Node *node = this->get_node((solution.size()-3));
+    Edge *edge = node->first_edge;
+        
+    while(edge != nullptr){
+        vector<int> aux_sol = solution;                  //~ Inicializa solução auxiliar;
+        aux_sol[(solution.size()-2)] = edge->target_id;  //~ Adiciona na solução auxliar o alvo da aresta;
+
+        Edge *aux_edge = this->get_node(aux_sol[(aux_sol.size()-2)])->first_edge;
+        while(aux_edge!=nullptr){
+            aux_sol[(solution.size()-1)] = aux_edge->target_id;
+            neighborhood.push_back(aux_sol);
+            aux_edge = aux_edge->next_edge;
+        }
+        
+        edge = edge->next_edge;
+    }
+    return neighborhood;
+}
+
+int Graph::get_total_dist(vector<int> solution){
+    int dist = 0;
+    for(int i=0; i<(solution.size()-2); i++){
+        dist += this->get_node(solution[i])->get_edge(solution[i+1])->dist;
+    }
+    return dist;
+}
+
+int Graph::get_total_points(vector<int> solution){
+    int pts = 0;
+    for(int i=0; i<solution.size(); i++){
+        pts += this->get_node(i)->points;
+    }
+    return pts;
+}
+
 vector<vector<int>> Graph::heuristic()
 {
     vector<vector<int>> solution;
@@ -292,6 +330,37 @@ vector<vector<int>> Graph::heuristic()
             candidates.erase(candidates.begin());
             candidates = this->updateCandidates(&candidates, this->get_node(aux[aux.size() - 1]));
         }
+        //* Local Search -------------------------------------------------------------
+        if(i < days -1){
+            vector<int> best_aux = aux;
+            vector<vector<int>> neighborhood = this->createNeighborhood(aux);
+            
+            long long int bad_iter = 0;        //~ Contador de iterações que não conseguiram melhorar a solução;
+            long long int max_bad_iter = 900;  //~ Máximo de iterações ruins;
+            long long int k = 0;
+            
+            while((bad_iter < max_bad_iter) && (k < neighborhood.size())){
+                int t_ls = get_total_dist(neighborhood[k]);
+                if(t_ls<td[i]){
+                    int best_points = get_total_points(best_aux);  //~ Pontuação da melhor solução atual;
+                    int pts = get_total_points(neighborhood[k]);   //~ Pontuação da solução da iteração atual;
+
+                    if(pts > best_points){
+                        best_aux = neighborhood[k];
+                        bad_iter = 0;
+                    }
+                    else{
+                        bad_iter++;
+                    }
+                }
+                else{
+                    bad_iter++;
+                }
+                k++;
+            }
+            aux = best_aux;
+        }
+        
         t = 0;
         solution.push_back(aux);
     }
