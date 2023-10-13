@@ -179,12 +179,6 @@ vector<pair<int, float>> Graph::createCandidates()
     sort(candidates.begin(), candidates.end(), [](const pair<int, float> &a, const pair<int, float> &b)
          { return a.second > b.second; });
 
-    cout << "Primeira lista de candidatos: ";
-    for (int i = 0; i < candidates.size(); i++)
-    {
-        cout << "(" << candidates[i].first << ", " << candidates[i].second << ")"
-             << " ";
-    }
     return candidates;
 }
 
@@ -249,7 +243,6 @@ vector<vector<int>> Graph::heuristic()
         if (solution.size() == 0) // O primeiro dia começa do primeiro hotel
         {
             aux.push_back(hotelsCandidates[0]);
-            hotelsCandidates.erase(hotelsCandidates.begin());
         }
         else
         {
@@ -279,7 +272,7 @@ vector<vector<int>> Graph::heuristic()
                 else
                 {
 
-                    for (int i = 0; i < hotelsCandidates.size() - 1; i++)
+                    for (int i = 0; i < hotelsCandidates.size(); i++)
                     {
                         Node *nodeAux = this->get_node(hotelsCandidates[i]);
                         float dist = this->get_node(aux[aux.size() - 1])->get_edge(nodeAux->id)->dist;
