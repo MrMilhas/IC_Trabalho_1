@@ -190,8 +190,22 @@ vector<int> Graph::createHotelsCandidates()
 
     for (int i = 0; i < h + 2; i++)
     {
+        if (i == 1)
+        {
+            node = node->next_node;
+            continue;
+        }
         candidates.push_back(node->id);
         node = node->next_node;
+    }
+
+    candidates.push_back(first_node->next_node->id);
+
+    cout << "h: " << h << endl;
+    cout << "Hoteis: ";
+    for (int i = 0; i < candidates.size(); i++)
+    {
+        cout << candidates[i] << " ";
     }
 
     return candidates;
@@ -205,17 +219,18 @@ vector<vector<int>> Graph::heuristic()
 
     int days = td.size();
 
+    // Cada dia gera uma solução diferente, a solução final é um conjunto de soluções
     for (int i = 0; i < days; i++)
     {
         vector<int> aux;
-        if (solution.size() == 0)
+        if (solution.size() == 0) // O primeiro dia começa do primeiro hotel
         {
             aux.push_back(hotelsCandidates[0]);
             hotelsCandidates.erase(hotelsCandidates.begin());
         }
         else
         {
-            aux.push_back(solution[i - 1].back());
+            aux.push_back(solution[i - 1].back()); // Se não for o primeiro dia, os demais começam com o hotel do dia anterior
         }
 
         float t = 0; // Tempo total da viagem
@@ -223,9 +238,9 @@ vector<vector<int>> Graph::heuristic()
         while (t < td[i])
         {
             aux.push_back(candidates[0]);
-            t += this->get_node(candidates[0])->get_edge(first_node->id)->dist;
+            t += this->get_node(candidates[0])->get_edge(first_node->id)->dist; // Somar o tempo da viagem
 
-            if (t > td[i])
+            if (t > td[i]) // Se o tempo da viagem for maior que o tempo disponível, remover o nó e inserir
             {
                 aux.pop_back();
 
@@ -235,7 +250,6 @@ vector<vector<int>> Graph::heuristic()
 
                 if (i == days - 1)
                 {
-                    cout << "PASSOU" << endl;
                     aux.push_back(hotelsCandidates.back());
                     break;
                 }
