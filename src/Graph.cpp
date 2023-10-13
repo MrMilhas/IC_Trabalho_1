@@ -231,7 +231,7 @@ vector<pair<int, float>> Graph::updateCandidates(vector<pair<int, float>> *candi
 vector<vector<int>> Graph::createNeighborhood(vector<int> solution){
     vector<vector<int>> neighborhood;
     
-    Node *node = this->get_node((solution.size()-3));
+    Node *node = this->get_node(solution[solution.size()-3]);
     Edge *edge = node->first_edge;
         
     while(edge != nullptr){
@@ -266,8 +266,25 @@ int Graph::get_total_points(vector<int> solution){
     return pts;
 }
 
+float Graph::get_ls_points(vector<int> solution){
+    float points_1 = this->get_total_points(solution)/ this->get_total_dist(solution);
+    float points_2 = -9999999;
+    
+    Edge *edge = this->get_node(solution[solution.size()-1])->first_edge;
+
+    while(edge != nullptr){
+        float aux = this->get_node(edge->target_id)->points / edge->dist;
+        if(aux > points_2){
+            points_2 = aux;
+        }
+        edge = edge->next_edge;
+    }
+    return points_1 + points_2;
+}
+
 vector<vector<int>> Graph::heuristic()
 {
+    vector<vector<vector<int>>> solutions;
     vector<vector<int>> solution;
     vector<pair<int, float>> candidates = this->createCandidates();
     vector<int> hotelsCandidates = this->createHotelsCandidates();
@@ -342,8 +359,8 @@ vector<vector<int>> Graph::heuristic()
             while((bad_iter < max_bad_iter) && (k < neighborhood.size())){
                 int t_ls = get_total_dist(neighborhood[k]);
                 if(t_ls<td[i]){
-                    int best_points = get_total_points(best_aux);  //~ Pontuação da melhor solução atual;
-                    int pts = get_total_points(neighborhood[k]);   //~ Pontuação da solução da iteração atual;
+                    int best_points = get_ls_points(best_aux);  //~ Pontuação da melhor solução atual;
+                    int pts = get_ls_points(neighborhood[k]);   //~ Pontuação da solução da iteração atual;
 
                     if(pts > best_points){
                         best_aux = neighborhood[k];
