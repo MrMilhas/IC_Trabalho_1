@@ -8,7 +8,7 @@ Node::Node(int id, char type, int points, int x, int y)
 {
     this->id = id;
     this->type = type;
-    this->points;
+    this->points = points;
     this->pos_x = x;
     this->pos_y = y;
 }

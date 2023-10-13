@@ -160,9 +160,9 @@ bool Graph::search_node(int id)
     }
 }
 
-vector<int> Graph::createCandidates()
+vector<pair<int, float>> Graph::createCandidates()
 {
-    vector<int> candidates;
+    vector<pair<int, float>> candidates;
 
     Node *node = first_node->next_node;
 
@@ -170,15 +170,21 @@ vector<int> Graph::createCandidates()
     {
         if (node->type == 'N')
         {
-            candidates.push_back(node->id);
+            candidates.push_back(make_pair(node->id, (node->points / node->get_edge(first_node->id)->dist)));
         }
         node = node->next_node;
     }
 
-    // Ordenar o vetor pela propriedade points
-    sort(candidates.begin(), candidates.end(), [this](int a, int b)
-         { return this->get_node(a)->points > this->get_node(b)->points; });
+    // Ordenar o vetor pelo segundo elemento
+    sort(candidates.begin(), candidates.end(), [](const pair<int, float> &a, const pair<int, float> &b)
+         { return a.second > b.second; });
 
+    cout << "Primeira lista de candidatos: ";
+    for (int i = 0; i < candidates.size(); i++)
+    {
+        cout << "(" << candidates[i].first << ", " << candidates[i].second << ")"
+             << " ";
+    }
     return candidates;
 }
 
@@ -211,10 +217,27 @@ vector<int> Graph::createHotelsCandidates()
     return candidates;
 }
 
+vector<pair<int, float>> Graph::updateCandidates(vector<pair<int, float>> *candidates, Node *node)
+{
+    vector<pair<int, float>> aux;
+
+    for (int i = 0; i < candidates->size(); i++)
+    {
+        Node *nodeAux = this->get_node(candidates->at(i).first);
+        aux.push_back(make_pair(candidates->at(i).first, (nodeAux->points / nodeAux->get_edge(node->id)->dist)));
+    }
+
+    // Ordenar o vetor pelo segundo elemento
+    sort(aux.begin(), aux.end(), [](const pair<int, float> &a, const pair<int, float> &b)
+         { return a.second > b.second; });
+
+    return aux;
+}
+
 vector<vector<int>> Graph::heuristic()
 {
     vector<vector<int>> solution;
-    vector<int> candidates = this->createCandidates();
+    vector<pair<int, float>> candidates = this->createCandidates();
     vector<int> hotelsCandidates = this->createHotelsCandidates();
 
     int days = td.size();
@@ -237,8 +260,8 @@ vector<vector<int>> Graph::heuristic()
 
         while (t < td[i])
         {
-            aux.push_back(candidates[0]);
-            t += this->get_node(candidates[0])->get_edge(first_node->id)->dist; // Somar o tempo da viagem
+            aux.push_back(candidates[0].first);
+            t += this->get_node(candidates[0].first)->get_edge(first_node->id)->dist; // Somar o tempo da viagem
 
             if (t > td[i]) // Se o tempo da viagem for maior que o tempo disponível, remover o nó e inserir
             {
@@ -274,6 +297,7 @@ vector<vector<int>> Graph::heuristic()
             }
 
             candidates.erase(candidates.begin());
+            candidates = this->updateCandidates(&candidates, this->get_node(aux[aux.size() - 1]));
         }
         t = 0;
         solution.push_back(aux);
