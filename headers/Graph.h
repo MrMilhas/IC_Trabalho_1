@@ -37,6 +37,7 @@ public:
     vector<vector<int>> createNeighborhood(vector<int> solution);
     int get_total_dist(vector<int> solution);
     int get_total_points(vector<int> solution);
+    float get_ls_points(vector<int> solution);
     vector<vector<int>> heuristic();                                                             //~ Função heurística;
 };
 
