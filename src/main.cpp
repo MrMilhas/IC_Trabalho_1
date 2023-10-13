@@ -256,13 +256,37 @@ int main(int argc, char const *argv[])
 
         cout << "-> Grafo construído com sucesso!" << endl;
         cout << "____________________________________________________" << endl;
+
+        cout << "-> Iniciando busca heurística..." << endl;
+        vector<vector<int>> solution = new_graph->heuristic();
+
+        cout << "-> Printando solução..." << endl;
+        cout << "____________________________________________________" << endl;
+
+        cout << "-> Solução encontrada: " << endl;
+        float benefit = 0;
+        for (int i = 0; i < solution.size(); i++)
+        {
+            cout << "-> Dia " << i + 1 << ": ";
+            for (int j = 0; j < solution[i].size(); j++)
+            {
+                cout << solution[i][j] << " ";
+                if (j != 0)
+                {
+                    benefit += new_graph->get_node(solution[i][j])->points;
+                }
+            }
+            cout << endl;
+        }
+
+        cout << "-> Pontuação total: " << benefit << endl;
     }
     else
     {
         return 1;
     }
     cout << "_____________________________________________________________________________________________" << endl;
-    cout << "#############################################################################################" << endl;
+    cout << "###############################################################1##############################" << endl;
 
     return 0;
 }
