@@ -2,11 +2,14 @@
 #include "../headers/Node.h"
 #include "../headers/Edge.h"
 #include <iostream>
+#include <set>
+#include <algorithm>
 
 using namespace std;
 
 //* Constructor and Destructor -------------------------------------------------------------
-Graph::Graph(int order, int h, int d, int tMax, vector<float> td){
+Graph::Graph(int order, int h, int d, int tMax, vector<float> td)
+{
     this->order = order;
     this->h = h;
     this->d = d;
@@ -16,10 +19,12 @@ Graph::Graph(int order, int h, int d, int tMax, vector<float> td){
     this->last_node = nullptr;
 }
 
-Graph::~Graph(){
+Graph::~Graph()
+{
     Node *next_node = this->first_node;
 
-    while (next_node != nullptr){
+    while (next_node != nullptr)
+    {
         next_node->remove_all_edges();
         Node *aux_node = next_node->next_node;
         delete next_node;
@@ -30,14 +35,16 @@ Graph::~Graph(){
 //* Other Functions ------------------------------------------------------------------------
 /**
  * @brief         Função utilizada para retornar um nó pelo seu id;
- * 
+ *
  * @param id      Id do nó que deseja retornar;
- * @return Node*  Retorna o ponteiro para o nó; 
+ * @return Node*  Retorna o ponteiro para o nó;
  */
-Node* Graph::get_node(int id){
+Node *Graph::get_node(int id)
+{
     Node *node = first_node;
 
-    while (node != nullptr){
+    while (node != nullptr)
+    {
         if (node->id == id)
             return node;
         node = node->next_node;
@@ -47,20 +54,23 @@ Node* Graph::get_node(int id){
 
 /**
  * @brief Função utilizada para inserir um novo nó no grafo;
- * 
+ *
  * @param id      Id do nó a ser inserido;
  * @param type    Tipo do nó (Hotel ou nó padrão);
  * @param points  Pontuação Si do nó;
  * @param x       Posição X do nó;
  * @param y       Posição Y do nó;
  */
-void Graph::insert_node(int id, char type, int points, int x, int y){
-    if (first_node != nullptr){
+void Graph::insert_node(int id, char type, int points, int x, int y)
+{
+    if (first_node != nullptr)
+    {
         Node *new_node = new Node(id, type, points, x, y);
         last_node->next_node = new_node;
         last_node = new_node;
     }
-    else{
+    else
+    {
         Node *new_node = new Node(id, type, points, x, y);
         first_node = new_node;
         last_node = new_node;
@@ -68,21 +78,25 @@ void Graph::insert_node(int id, char type, int points, int x, int y){
 }
 
 /**
- * @brief            Função utilizada para inserir uma nova aresta no grafo; 
- * 
+ * @brief            Função utilizada para inserir uma nova aresta no grafo;
+ *
  * @param id         Id da aresta a ser inserida;
  * @param target_id  Id do nó alvo da aresta;
  * @param weight     Peso da aresta a ser inserida (distância entre os nós);
  */
-void Graph::insert_edge(int id, int target_id, float dist){
+void Graph::insert_edge(int id, int target_id, float dist)
+{
     Node *node = get_node(id);
     Node *aux = get_node(target_id);
 
-    if (node != nullptr && aux != nullptr){
-        if (!node->search_edge(target_id)){
+    if (node != nullptr && aux != nullptr)
+    {
+        if (!node->search_edge(target_id))
+        {
             node->insert_edge(target_id, dist);
 
-            if (!aux->search_edge(id)){
+            if (!aux->search_edge(id))
+            {
                 aux->insert_edge(id, dist);
             }
         }
@@ -91,26 +105,32 @@ void Graph::insert_edge(int id, int target_id, float dist){
 
 /**
  * @brief     Função utilizada para remover um nó do grafo pelo seu Id;
- * 
+ *
  * @param id  Id do nó a ser removido;
  */
-void Graph::remove_node(int id){
+void Graph::remove_node(int id)
+{
     Node *node = get_node(id);
 
-    if (node == nullptr){
+    if (node == nullptr)
+    {
         return;
     }
-    else if (node == first_node){
+    else if (node == first_node)
+    {
         first_node = node->next_node;
     }
-    else{
+    else
+    {
         Node *aux = first_node;
 
-        while (aux->next_node != node){
+        while (aux->next_node != node)
+        {
             aux = aux->next_node;
         }
 
-        if (node == last_node){
+        if (node == last_node)
+        {
             last_node = aux;
         }
 
@@ -121,18 +141,129 @@ void Graph::remove_node(int id){
 
 /**
  * @brief         Função utilizda para procurar uma nó no grafo pelo seu Id;
- * 
+ *
  * @param id      Id do nó a ser procurado no grafo;
  * @return true   Retorna verdadeiro se encontrar o nó;
  * @return false  Retorna falso se não encontrar o nó;
  */
-bool Graph::search_node(int id){
+bool Graph::search_node(int id)
+{
     Node *node = get_node(id);
 
-    if (node == nullptr){
+    if (node == nullptr)
+    {
         return false;
     }
-    else{
+    else
+    {
         return true;
     }
+}
+
+vector<int> Graph::createCandidates()
+{
+    vector<int> candidates;
+
+    Node *node = first_node->next_node;
+
+    while (node != nullptr)
+    {
+        if (node->type == 'N')
+        {
+            candidates.push_back(node->id);
+        }
+        node = node->next_node;
+    }
+
+    // Ordenar o vetor pela propriedade points
+    sort(candidates.begin(), candidates.end(), [this](int a, int b)
+         { return this->get_node(a)->points > this->get_node(b)->points; });
+
+    return candidates;
+}
+
+vector<int> Graph::createHotelsCandidates()
+{
+    vector<int> candidates;
+
+    Node *node = first_node;
+
+    for (int i = 0; i < h + 2; i++)
+    {
+        candidates.push_back(node->id);
+        node = node->next_node;
+    }
+
+    return candidates;
+}
+
+vector<vector<int>> Graph::heuristic()
+{
+    vector<vector<int>> solution;
+    vector<int> candidates = this->createCandidates();
+    vector<int> hotelsCandidates = this->createHotelsCandidates();
+
+    int days = td.size();
+
+    for (int i = 0; i < days; i++)
+    {
+        vector<int> aux;
+        if (solution.size() == 0)
+        {
+            aux.push_back(hotelsCandidates[0]);
+            hotelsCandidates.erase(hotelsCandidates.begin());
+        }
+        else
+        {
+            aux.push_back(solution[i - 1].back());
+        }
+
+        float t = 0; // Tempo total da viagem
+
+        while (t < td[i])
+        {
+            aux.push_back(candidates[0]);
+            t += this->get_node(candidates[0])->get_edge(first_node->id)->dist;
+
+            if (t > td[i])
+            {
+                aux.pop_back();
+
+                // Buscar o hotel mais próximo
+                float min = 999999999;
+                Node *hotel = nullptr;
+
+                if (i == days - 1)
+                {
+                    cout << "PASSOU" << endl;
+                    aux.push_back(hotelsCandidates.back());
+                    break;
+                }
+                else
+                {
+
+                    for (int i = 0; i < hotelsCandidates.size() - 1; i++)
+                    {
+                        Node *nodeAux = this->get_node(hotelsCandidates[i]);
+                        float dist = this->get_node(aux[aux.size() - 1])->get_edge(nodeAux->id)->dist;
+
+                        if (dist < min)
+                        {
+                            min = dist;
+                            hotel = nodeAux;
+                        }
+                    }
+                    aux.push_back(hotel->id);
+                }
+                t = 0;
+                break;
+            }
+
+            candidates.erase(candidates.begin());
+        }
+        t = 0;
+        solution.push_back(aux);
+    }
+
+    return solution;
 }
