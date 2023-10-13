@@ -160,9 +160,9 @@ bool Graph::search_node(int id)
     }
 }
 
-vector<pair<int, float>> Graph::createCandidates()
+vector<pair<int, double>> Graph::createCandidates()
 {
-    vector<pair<int, float>> candidates;
+    vector<pair<int, double>> candidates;
 
     Node *node = first_node->next_node;
 
@@ -211,9 +211,9 @@ vector<int> Graph::createHotelsCandidates()
     return candidates;
 }
 
-vector<pair<int, float>> Graph::updateCandidates(vector<pair<int, float>> *candidates, Node *node)
+vector<pair<int, double>> Graph::updateCandidates(vector<pair<int, double>> *candidates, Node *node)
 {
-    vector<pair<int, float>> aux;
+    vector<pair<int, double>> aux;
 
     for (int i = 0; i < candidates->size(); i++)
     {
@@ -231,7 +231,7 @@ vector<pair<int, float>> Graph::updateCandidates(vector<pair<int, float>> *candi
 vector<vector<int>> Graph::heuristic()
 {
     vector<vector<int>> solution;
-    vector<pair<int, float>> candidates = this->createCandidates();
+    vector<pair<int, double>> candidates = this->createCandidates();
     vector<int> hotelsCandidates = this->createHotelsCandidates();
 
     int days = td.size();

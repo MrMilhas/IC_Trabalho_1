@@ -31,10 +31,10 @@ public:
     void remove_node(int id);                                      //~ Remove nó pelo seu id;
     bool search_node(int id);                                      //~ Verifica se nó existe;
 
-    vector<pair<int, float>> createCandidates();                                                 //~ Cria conjunto de candidatos;
-    vector<int> createHotelsCandidates();                                                        //~ Cria conjunto de candidatos de hoteis;
-    vector<pair<int, float>> updateCandidates(vector<pair<int, float>> *candidates, Node *node); //~ Atualiza conjunto de candidatos;
-    vector<vector<int>> heuristic();                                                             //~ Função heurística;
+    vector<pair<int, double>> createCandidates();                                                  //~ Cria conjunto de candidatos;
+    vector<int> createHotelsCandidates();                                                          //~ Cria conjunto de candidatos de hoteis;
+    vector<pair<int, double>> updateCandidates(vector<pair<int, double>> *candidates, Node *node); //~ Atualiza conjunto de candidatos;
+    vector<vector<int>> heuristic();                                                               //~ Função heurística;
 };
 
 #endif
