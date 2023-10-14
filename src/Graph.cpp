@@ -4,6 +4,15 @@
 #include <iostream>
 #include <set>
 #include <algorithm>
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <stdlib.h>
+#include <string>
+#include <vector>
+#include <cstring>
+#include <math.h>
+#include <random>
 
 using namespace std;
 
@@ -160,9 +169,9 @@ bool Graph::search_node(int id)
     }
 }
 
-vector<pair<int, float>> Graph::createCandidates()
+vector<pair<int, double>> Graph::createCandidates()
 {
-    vector<pair<int, float>> candidates;
+    vector<pair<int, double>> candidates;
 
     Node *node = first_node->next_node;
 
@@ -201,19 +210,12 @@ vector<int> Graph::createHotelsCandidates()
 
     candidates.push_back(first_node->next_node->id);
 
-    cout << "h: " << h << endl;
-    cout << "Hoteis: ";
-    for (int i = 0; i < candidates.size(); i++)
-    {
-        cout << candidates[i] << " ";
-    }
-
     return candidates;
 }
 
-vector<pair<int, float>> Graph::updateCandidates(vector<pair<int, float>> *candidates, Node *node)
+vector<pair<int, double>> Graph::updateCandidates(vector<pair<int, double>> *candidates, Node *node)
 {
-    vector<pair<int, float>> aux;
+    vector<pair<int, double>> aux;
 
     for (int i = 0; i < candidates->size(); i++)
     {
@@ -228,7 +230,30 @@ vector<pair<int, float>> Graph::updateCandidates(vector<pair<int, float>> *candi
     return aux;
 }
 
-vector<vector<int>> Graph::createNeighborhood(vector<int> solution){
+vector<vector<int>> Graph::createNeighborhood(vector<int> solution, vector<pair<int, double>> cand, vector<int> hotels){
+    vector<vector<int>> neighborhood;
+    vector<pair<int, double>> aux_cands = cand;
+
+    for(int w=0; w<cand.size(); w++){
+        solution[1] = aux_cands[w].first;
+        aux_cands.erase(aux_cands.begin()+w);
+
+        for(int i=0; i<cand.size(); i++){
+            solution[solution.size()-2] = aux_cands[i].first;
+            for(int k=0; k<hotels.size(); k++){
+                if((hotels[k] != 0) && (hotels[k] != 1)){
+                    solution[solution.size()-1] = hotels[k];
+                    neighborhood.push_back(solution);
+                }
+            }
+        }
+        aux_cands = cand;
+    }
+    return neighborhood;
+}
+
+/*
+vector<vector<int>> Graph::createNeighborhood(vector<int> solution, vector<pair<int, double>> cand, vector<int> hotels){
     vector<vector<int>> neighborhood;
     
     Node *node = this->get_node(solution[solution.size()-3]);
@@ -247,8 +272,11 @@ vector<vector<int>> Graph::createNeighborhood(vector<int> solution){
         
         edge = edge->next_edge;
     }
+
+
     return neighborhood;
 }
+*/
 
 int Graph::get_total_dist(vector<int> solution){
     int dist = 0;
@@ -260,14 +288,14 @@ int Graph::get_total_dist(vector<int> solution){
 
 int Graph::get_total_points(vector<int> solution){
     int pts = 0;
-    for(int i=0; i<solution.size(); i++){
-        pts += this->get_node(i)->points;
+    for(int i=0; i<solution.size()-1; i++){
+        pts += this->get_node(solution[i])->points/this->get_node(solution[i])->get_edge(solution[i+1])->dist;
     }
     return pts;
 }
 
 float Graph::get_ls_points(vector<int> solution){
-    float points_1 = this->get_total_points(solution)/ this->get_total_dist(solution);
+    float points_1 = this->get_total_points(solution);
     float points_2 = -9999999;
     
     Edge *edge = this->get_node(solution[solution.size()-1])->first_edge;
@@ -282,11 +310,25 @@ float Graph::get_ls_points(vector<int> solution){
     return points_1 + points_2;
 }
 
+int randomRange(int min, int max)
+{
+    return min + rand() % (max - min + 1);
+}
+
+int verify_visited(int id, vector<pair<int, double>> solution){
+    for(int i=0; i<solution.size(); i++){
+        if(solution[i].first == id){
+            return 1;
+        }
+    }
+    return 0;
+}
+
 vector<vector<int>> Graph::heuristic()
 {
     vector<vector<vector<int>>> solutions;
     vector<vector<int>> solution;
-    vector<pair<int, float>> candidates = this->createCandidates();
+    vector<pair<int, double>> candidates = this->createCandidates();
     vector<int> hotelsCandidates = this->createHotelsCandidates();
 
     int days = td.size();
@@ -350,11 +392,11 @@ vector<vector<int>> Graph::heuristic()
         //* Local Search -------------------------------------------------------------
         if(i < days -1){
             vector<int> best_aux = aux;
-            vector<vector<int>> neighborhood = this->createNeighborhood(aux);
+            vector<vector<int>> neighborhood = this->createNeighborhood(aux, candidates, hotelsCandidates);
             
-            long long int bad_iter = 0;        //~ Contador de iterações que não conseguiram melhorar a solução;
-            long long int max_bad_iter = 900;  //~ Máximo de iterações ruins;
-            long long int k = 0;
+            float bad_iter = 0;                          //~ Contador de iterações que não conseguiram melhorar a solução;
+            float max_bad_iter = neighborhood.size()/2;  //~ Máximo de iterações ruins;
+            float k = 0;
             
             while((bad_iter < max_bad_iter) && (k < neighborhood.size())){
                 int t_ls = get_total_dist(neighborhood[k]);
@@ -383,4 +425,134 @@ vector<vector<int>> Graph::heuristic()
     }
 
     return solution;
+}
+
+vector<vector<int>> Graph::randomizedHeuristic(float alfa, int numIt, int seed)
+{
+    vector<int> visiteds;
+    vector<vector<int>> solution;
+    vector<vector<int>> bestSolution;
+    int bestScore = 0;
+    int auxScore = 0;
+
+    int it = 0;
+
+    while (it < numIt)
+    {
+        vector<pair<int, double>> candidates = this->createCandidates();
+        vector<int> hotelsCandidates = this->createHotelsCandidates();
+        int pos = randomRange(0, static_cast<int>(candidates.size() - 1) * alfa);
+
+        if (it == 0)
+            cout << "Pos: " << pos << endl;
+
+        int days = this->td.size();
+
+        // Cada dia gera uma solução diferente, a solução final é um conjunto de soluções
+        for (int i = 0; i < days; i++)
+        {
+            vector<int> aux;
+            if (solution.size() == 0) // O primeiro dia começa do primeiro hotel
+            {
+                aux.push_back(hotelsCandidates[0]);
+            }
+            else
+            {
+                aux.push_back(solution[i - 1].back()); // Se não for o primeiro dia, os demais começam com o hotel do dia anterior
+            }
+
+            float t = 0; // Tempo total da viagem
+
+            while (t < td[i])
+            {
+                pos = randomRange(0, static_cast<int>(candidates.size() - 1) * alfa);
+                aux.push_back(candidates.at(pos).first);
+                visiteds.push_back(candidates.at(pos).first);
+                t += this->get_node(candidates.at(pos).first)->get_edge(first_node->id)->dist; // Somar o tempo da viagem
+                auxScore += this->get_node(candidates.at(pos).first)->points;
+
+                if (t > td[i]) // Se o tempo da viagem for maior que o tempo disponível, remover o nó e inserir
+                {
+                    aux.pop_back();
+
+                    // Buscar o hotel mais próximo
+                    float min = 999999999;
+                    Node *hotel = nullptr;
+
+                    if (i == days - 1)
+                    {
+                        aux.push_back(hotelsCandidates.back());
+                        break;
+                    }
+                    else
+                    {
+
+                        for (int i = 0; i < hotelsCandidates.size(); i++)
+                        {
+                            Node *nodeAux = this->get_node(hotelsCandidates[i]);
+                            float dist = this->get_node(aux[aux.size() - 1])->get_edge(nodeAux->id)->dist;
+
+                            if (dist < min)
+                            {
+                                min = dist;
+                                hotel = nodeAux;
+                            }
+                        }
+                        aux.push_back(hotel->id);
+                    }
+                    t = 0;
+                    break;
+                }
+                else{
+                    candidates.erase(candidates.begin() + pos);
+                }
+                candidates = this->updateCandidates(&candidates, this->get_node(aux[aux.size() - 1]));
+            }
+            //* Local Search -------------------------------------------------------------
+            if(i < days -1){
+                vector<int> best_aux = aux;
+                vector<vector<int>> neighborhood = this->createNeighborhood(aux, candidates, hotelsCandidates);
+                
+                float bad_iter = 0;                          //~ Contador de iterações que não conseguiram melhorar a solução;
+                float max_bad_iter = 500;  //~ Máximo de iterações ruins;
+                float k = 0;
+                
+                while((bad_iter < max_bad_iter) && (k < neighborhood.size())){
+                    int t_ls = get_total_dist(neighborhood[k]);
+                    if(t_ls<td[i]){
+                        int best_points = get_ls_points(best_aux);  //~ Pontuação da melhor solução atual;
+                        int pts = get_ls_points(neighborhood[k]);   //~ Pontuação da solução da iteração atual;
+
+                        if(pts > best_points){
+                            best_aux = neighborhood[k];
+                            bad_iter = 0;
+                        }
+                        else{
+                            bad_iter++;
+                        }
+                    }
+                    else{
+                        bad_iter++;
+                    }
+                    k++;
+                }
+                aux = best_aux;
+            }
+
+            t = 0;
+            solution.push_back(aux);
+        }
+
+        if (auxScore > bestScore)
+        {
+            bestScore = auxScore;
+            bestSolution = solution;
+        }
+
+        auxScore = 0;
+        solution.clear();
+        it++;
+    }
+
+    return bestSolution;
 }
