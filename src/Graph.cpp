@@ -201,13 +201,6 @@ vector<int> Graph::createHotelsCandidates()
 
     candidates.push_back(first_node->next_node->id);
 
-    cout << "h: " << h << endl;
-    cout << "Hoteis: ";
-    for (int i = 0; i < candidates.size(); i++)
-    {
-        cout << candidates[i] << " ";
-    }
-
     return candidates;
 }
 
@@ -297,4 +290,104 @@ vector<vector<int>> Graph::heuristic()
     }
 
     return solution;
+}
+
+int randomRange(int min, int max)
+{
+    return min + rand() % (max - min + 1);
+}
+
+vector<vector<int>> Graph::randomizedHeuristic(float alfa, int numIt, int seed)
+{
+    vector<vector<int>> solution;
+    vector<vector<int>> bestSolution;
+    int bestScore = 0;
+    int auxScore = 0;
+
+    int it = 0;
+
+    while (it < numIt)
+    {
+        vector<pair<int, double>> candidates = this->createCandidates();
+        vector<int> hotelsCandidates = this->createHotelsCandidates();
+        int pos = randomRange(0, static_cast<int>(candidates.size() - 1) * alfa);
+
+        if (it == 0)
+            cout << "Pos: " << pos << endl;
+
+        int days = this->td.size();
+
+        // Cada dia gera uma solução diferente, a solução final é um conjunto de soluções
+        for (int i = 0; i < days; i++)
+        {
+            vector<int> aux;
+            if (solution.size() == 0) // O primeiro dia começa do primeiro hotel
+            {
+                aux.push_back(hotelsCandidates[0]);
+            }
+            else
+            {
+                aux.push_back(solution[i - 1].back()); // Se não for o primeiro dia, os demais começam com o hotel do dia anterior
+            }
+
+            float t = 0; // Tempo total da viagem
+
+            while (t < td[i])
+            {
+                aux.push_back(candidates.at(pos).first);
+                t += this->get_node(candidates.at(pos).first)->get_edge(first_node->id)->dist; // Somar o tempo da viagem
+                auxScore += this->get_node(candidates.at(pos).first)->points;
+
+                if (t > td[i]) // Se o tempo da viagem for maior que o tempo disponível, remover o nó e inserir
+                {
+                    aux.pop_back();
+
+                    // Buscar o hotel mais próximo
+                    float min = 999999999;
+                    Node *hotel = nullptr;
+
+                    if (i == days - 1)
+                    {
+                        aux.push_back(hotelsCandidates.back());
+                        break;
+                    }
+                    else
+                    {
+
+                        for (int i = 0; i < hotelsCandidates.size(); i++)
+                        {
+                            Node *nodeAux = this->get_node(hotelsCandidates[i]);
+                            float dist = this->get_node(aux[aux.size() - 1])->get_edge(nodeAux->id)->dist;
+
+                            if (dist < min)
+                            {
+                                min = dist;
+                                hotel = nodeAux;
+                            }
+                        }
+                        aux.push_back(hotel->id);
+                    }
+                    t = 0;
+                    break;
+                }
+
+                candidates.erase(candidates.begin() + pos);
+                candidates = this->updateCandidates(&candidates, this->get_node(aux[aux.size() - 1]));
+            }
+            t = 0;
+            solution.push_back(aux);
+        }
+
+        if (auxScore > bestScore)
+        {
+            bestScore = auxScore;
+            bestSolution = solution;
+        }
+
+        auxScore = 0;
+        solution.clear();
+        it++;
+    }
+
+    return bestSolution;
 }

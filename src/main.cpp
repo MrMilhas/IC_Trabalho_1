@@ -258,7 +258,8 @@ int main(int argc, char const *argv[])
         cout << "____________________________________________________" << endl;
 
         cout << "-> Iniciando busca heurística..." << endl;
-        vector<vector<int>> solution = new_graph->heuristic();
+        // Setando a seed para o random
+        vector<vector<int>> solution = new_graph->randomizedHeuristic(0.3, 10000, 12);
 
         cout << "-> Printando solução..." << endl;
         cout << "____________________________________________________" << endl;

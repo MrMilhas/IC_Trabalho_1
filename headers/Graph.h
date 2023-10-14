@@ -35,6 +35,7 @@ public:
     vector<int> createHotelsCandidates();                                                          //~ Cria conjunto de candidatos de hoteis;
     vector<pair<int, double>> updateCandidates(vector<pair<int, double>> *candidates, Node *node); //~ Atualiza conjunto de candidatos;
     vector<vector<int>> heuristic();                                                               //~ Função heurística;
+    vector<vector<int>> randomizedHeuristic(float alfa, int numIt, int seed);                      //~ Função heurística randomizada;
 };
 
 #endif
