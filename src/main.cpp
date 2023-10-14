@@ -9,6 +9,7 @@
 #include <vector>
 #include <cstring>
 #include <math.h>
+#include <time.h>
 
 using namespace std;
 
@@ -23,8 +24,8 @@ using namespace std;
  */
 float euclidian_dist(int x1, int y1, int x2, int y2)
 {
-    float x = x1 - x2;
-    float y = y1 - y2;
+    float x = abs(x2 - x1);
+    float y = abs(y2 - y1);
     float dist;
 
     dist = pow(x, 2) + pow(y, 2);
@@ -50,10 +51,10 @@ Graph *build_graph(ifstream &instance)
     int tMax = 0;     //~ Duração máxima do passeio;
     vector<float> td; //~ Vetor contendo a duração de cada viagem;
 
-    int x = 0;  //~ Posição X inicial dos nós;
-    int y = 0;  //~ Posição Y inicial dos nós;
-    int sI = 0; //~ Pontuação inicial dos nós;
-    int id = 0; //~ Id inicial dos nós;
+    float x = 0;  //~ Posição X inicial dos nós;
+    float y = 0;  //~ Posição Y inicial dos nós;
+    float sI = 0; //~ Pontuação inicial dos nós;
+    int id = 0;   //~ Id inicial dos nós;
 
     int count = 0; //~ Contador auxiliar para os hotéis extras;
 
@@ -129,11 +130,11 @@ Graph *build_graph(ifstream &instance)
                             string aux = "";
 
                             getline(ss, aux, '	');
-                            x = stoi(aux);
+                            x = stof(aux);
                             getline(ss, aux, '	');
-                            y = stoi(aux);
+                            y = stof(aux);
                             getline(ss, aux, '\n');
-                            sI = stoi(aux);
+                            sI = stof(aux);
 
                             new_graph->insert_node(id, 'I', sI, x, y);
                             count_line++;
@@ -228,6 +229,7 @@ Graph *build_graph(ifstream &instance)
 
 int main(int argc, char const *argv[])
 {
+    srand(time (0));
     cout << "######################################### BEM VINDO #########################################" << endl;
     cout << "_____________________________________________________________________________________________" << endl;
 
@@ -259,7 +261,7 @@ int main(int argc, char const *argv[])
 
         cout << "-> Iniciando busca heurística..." << endl;
         // Setando a seed para o random
-        vector<vector<int>> solution = new_graph->randomizedHeuristic(0.6, 5000, 42);
+        vector<vector<int>> solution = new_graph->randomizedHeuristic(0.15, 10000, 42);
 
         cout << "-> Printando solução..." << endl;
         cout << "____________________________________________________" << endl;

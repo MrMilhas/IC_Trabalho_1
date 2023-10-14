@@ -4,7 +4,7 @@
 using namespace std;
 
 //* Constructor and Destructor -------------------------------------------------------------
-Node::Node(int id, char type, int points, int x, int y)
+Node::Node(int id, char type, float points, float x, float y)
 {
     this->id = id;
     this->type = type;

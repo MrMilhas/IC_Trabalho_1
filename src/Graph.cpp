@@ -179,7 +179,7 @@ vector<pair<int, double>> Graph::createCandidates()
     {
         if (node->type == 'N')
         {
-            candidates.push_back(make_pair(node->id, (node->points / node->get_edge(first_node->id)->dist)));
+            candidates.push_back(make_pair(node->id, (node->points/(node->get_edge(first_node->id)->dist))));
         }
         node = node->next_node;
     }
@@ -220,7 +220,7 @@ vector<pair<int, double>> Graph::updateCandidates(vector<pair<int, double>> *can
     for (int i = 0; i < candidates->size(); i++)
     {
         Node *nodeAux = this->get_node(candidates->at(i).first);
-        aux.push_back(make_pair(candidates->at(i).first, (nodeAux->points / nodeAux->get_edge(node->id)->dist)));
+        aux.push_back(make_pair(candidates->at(i).first, ((nodeAux->points)/(nodeAux->get_edge(node->id)->dist))));
     }
 
     // Ordenar o vetor pelo segundo elemento
@@ -230,6 +230,80 @@ vector<pair<int, double>> Graph::updateCandidates(vector<pair<int, double>> *can
     return aux;
 }
 
+int verify_visited(int id, vector<int> solution){
+    for(int i=0; i<solution.size(); i++){
+        if(solution[i] == id){
+            return 1;
+        }
+    }
+    return 0;
+}
+
+int randomRange(int min, int max)
+{
+    return min + rand() % (max - min + 1);
+}
+/*
+vector<vector<int>> Graph::createNeighborhood(vector<int> solution, vector<int> hotels){
+    vector<int> vec;
+    vector<int> aux_solution;
+    vector<vector<int>> neighborhood;
+
+    for(int i=0; i<(solution.size()-1); i++){
+        for(int k=0; k<i; k++){
+            vec.push_back(solution[k]);
+        }
+
+        if(i>0){
+            float lim_dist = this->get_node(vec[i-1])->get_edge(solution[i])->dist;
+            float count_dist = 0;
+            while(count_dist < lim_dist){
+                int index = randomRange(3, this->order-1);
+                if(!verify_visited(index, solution) && !verify_visited(index, vec)){
+                    vec.push_back(index);
+                    count_dist += this->get_node(vec[i-1])->get_edge(vec[i])->dist;
+                }
+            }
+        }
+
+        for(int w=i; w<solution.size(); w++){
+            vec.push_back(solution[i]);
+        }
+
+        for(int k=0; k<hotels.size(); k++){
+            if((hotels[k] != 0) && (hotels[k] != 1)){
+                solution[solution.size()-1] = hotels[k];
+                neighborhood.push_back(solution);
+            }
+        }
+        vec.clear();
+    }
+    return neighborhood;
+}
+*/
+
+vector<vector<int>> Graph::createNeighborhood(vector<int> solution, vector<pair<int, double>> cand, vector<int> hotels){
+    vector<vector<int>> neighborhood;
+    vector<pair<int, double>> aux_cands = cand;
+
+    for(int r=0; r<(solution.size()-1); r++){
+        for(int w=0; w<cand.size(); w++){
+        solution[1] = aux_cands[w].first;
+        aux_cands.erase(aux_cands.begin()+w);
+
+            for(int k=0; k<hotels.size(); k++){
+                if((hotels[k] != 0) && (hotels[k] != 1)){
+                    solution[solution.size()-1] = hotels[k];
+                    neighborhood.push_back(solution);
+                }
+            }
+            aux_cands = cand;
+        }
+    }
+    return neighborhood;
+}
+
+/*
 vector<vector<int>> Graph::createNeighborhood(vector<int> solution, vector<pair<int, double>> cand, vector<int> hotels){
     vector<vector<int>> neighborhood;
     vector<pair<int, double>> aux_cands = cand;
@@ -251,6 +325,7 @@ vector<vector<int>> Graph::createNeighborhood(vector<int> solution, vector<pair<
     }
     return neighborhood;
 }
+*/
 
 /*
 vector<vector<int>> Graph::createNeighborhood(vector<int> solution, vector<pair<int, double>> cand, vector<int> hotels){
@@ -278,18 +353,18 @@ vector<vector<int>> Graph::createNeighborhood(vector<int> solution, vector<pair<
 }
 */
 
-int Graph::get_total_dist(vector<int> solution){
-    int dist = 0;
+float Graph::get_total_dist(vector<int> solution){
+    float dist = 0;
     for(int i=0; i<(solution.size()-2); i++){
         dist += this->get_node(solution[i])->get_edge(solution[i+1])->dist;
     }
     return dist;
 }
 
-int Graph::get_total_points(vector<int> solution){
-    int pts = 0;
+float Graph::get_total_points(vector<int> solution){
+    float pts = 0.0;
     for(int i=0; i<solution.size()-1; i++){
-        pts += this->get_node(solution[i])->points/this->get_node(solution[i])->get_edge(solution[i+1])->dist;
+        pts += ((this->get_node(solution[i])->points)/(this->get_node(solution[i])->get_edge(solution[i+1])->dist));
     }
     return pts;
 }
@@ -301,7 +376,7 @@ float Graph::get_ls_points(vector<int> solution){
     Edge *edge = this->get_node(solution[solution.size()-1])->first_edge;
 
     while(edge != nullptr){
-        float aux = this->get_node(edge->target_id)->points / edge->dist;
+        float aux = ((this->get_node(edge->target_id)->points)/(edge->dist));
         if(aux > points_2){
             points_2 = aux;
         }
@@ -310,20 +385,8 @@ float Graph::get_ls_points(vector<int> solution){
     return points_1 + points_2;
 }
 
-int randomRange(int min, int max)
-{
-    return min + rand() % (max - min + 1);
-}
 
-int verify_visited(int id, vector<pair<int, double>> solution){
-    for(int i=0; i<solution.size(); i++){
-        if(solution[i].first == id){
-            return 1;
-        }
-    }
-    return 0;
-}
-
+/*
 vector<vector<int>> Graph::heuristic()
 {
     vector<vector<vector<int>>> solutions;
@@ -392,7 +455,7 @@ vector<vector<int>> Graph::heuristic()
         //* Local Search -------------------------------------------------------------
         if(i < days -1){
             vector<int> best_aux = aux;
-            vector<vector<int>> neighborhood = this->createNeighborhood(aux, candidates, hotelsCandidates);
+            vector<vector<int>> neighborhood = this->createNeighborhood(aux, hotelsCandidates);
             
             float bad_iter = 0;                          //~ Contador de iterações que não conseguiram melhorar a solução;
             float max_bad_iter = neighborhood.size()/2;  //~ Máximo de iterações ruins;
@@ -426,14 +489,15 @@ vector<vector<int>> Graph::heuristic()
 
     return solution;
 }
+*/
 
 vector<vector<int>> Graph::randomizedHeuristic(float alfa, int numIt, int seed)
 {
     vector<int> visiteds;
     vector<vector<int>> solution;
     vector<vector<int>> bestSolution;
-    int bestScore = 0;
-    int auxScore = 0;
+    float bestScore = 0;
+    float auxScore = 0;
 
     int it = 0;
 
@@ -514,7 +578,7 @@ vector<vector<int>> Graph::randomizedHeuristic(float alfa, int numIt, int seed)
                 vector<vector<int>> neighborhood = this->createNeighborhood(aux, candidates, hotelsCandidates);
                 
                 float bad_iter = 0;                          //~ Contador de iterações que não conseguiram melhorar a solução;
-                float max_bad_iter = 500;  //~ Máximo de iterações ruins;
+                float max_bad_iter = 1000;                   //~ Máximo de iterações ruins;
                 float k = 0;
                 
                 while((bad_iter < max_bad_iter) && (k < neighborhood.size())){
@@ -553,6 +617,5 @@ vector<vector<int>> Graph::randomizedHeuristic(float alfa, int numIt, int seed)
         solution.clear();
         it++;
     }
-
     return bestSolution;
 }
