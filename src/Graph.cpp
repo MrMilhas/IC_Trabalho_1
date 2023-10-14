@@ -179,7 +179,7 @@ vector<pair<int, double>> Graph::createCandidates()
     {
         if (node->type == 'N')
         {
-            candidates.push_back(make_pair(node->id, (node->points/(node->get_edge(first_node->id)->dist))));
+            candidates.push_back(make_pair(node->id, ((node->points/(node->get_edge(first_node->id)->dist)))));
         }
         node = node->next_node;
     }
@@ -220,7 +220,7 @@ vector<pair<int, double>> Graph::updateCandidates(vector<pair<int, double>> *can
     for (int i = 0; i < candidates->size(); i++)
     {
         Node *nodeAux = this->get_node(candidates->at(i).first);
-        aux.push_back(make_pair(candidates->at(i).first, ((nodeAux->points)/(nodeAux->get_edge(node->id)->dist))));
+        aux.push_back(make_pair(candidates->at(i).first, (((nodeAux->points)/(nodeAux->get_edge(node->id)->dist)))));
     }
 
     // Ordenar o vetor pelo segundo elemento
@@ -285,20 +285,22 @@ vector<vector<int>> Graph::createNeighborhood(vector<int> solution, vector<int> 
 vector<vector<int>> Graph::createNeighborhood(vector<int> solution, vector<pair<int, double>> cand, vector<int> hotels){
     vector<vector<int>> neighborhood;
     vector<pair<int, double>> aux_cands = cand;
+    vector<int> aux_solution = solution;
 
-    for(int r=0; r<(solution.size()-1); r++){
+    for(int r=1; r<(aux_solution.size()-1); r++){
         for(int w=0; w<cand.size(); w++){
-        solution[1] = aux_cands[w].first;
-        aux_cands.erase(aux_cands.begin()+w);
+            aux_solution[r] = aux_cands[w].first;
+            aux_cands.erase(aux_cands.begin()+w);
 
             for(int k=0; k<hotels.size(); k++){
                 if((hotels[k] != 0) && (hotels[k] != 1)){
-                    solution[solution.size()-1] = hotels[k];
-                    neighborhood.push_back(solution);
+                    aux_solution[aux_solution.size()-1] = hotels[k];
+                    neighborhood.push_back(aux_solution);
                 }
             }
             aux_cands = cand;
         }
+        aux_solution = solution;
     }
     return neighborhood;
 }
@@ -364,7 +366,7 @@ float Graph::get_total_dist(vector<int> solution){
 float Graph::get_total_points(vector<int> solution){
     float pts = 0.0;
     for(int i=0; i<solution.size()-1; i++){
-        pts += ((this->get_node(solution[i])->points)/(this->get_node(solution[i])->get_edge(solution[i+1])->dist));
+        pts += ((this->get_node(solution[i])->points));
     }
     return pts;
 }
@@ -376,7 +378,7 @@ float Graph::get_ls_points(vector<int> solution){
     Edge *edge = this->get_node(solution[solution.size()-1])->first_edge;
 
     while(edge != nullptr){
-        float aux = ((this->get_node(edge->target_id)->points)/(edge->dist));
+        float aux = ((this->get_node(edge->target_id)->points));
         if(aux > points_2){
             points_2 = aux;
         }
@@ -526,13 +528,14 @@ vector<vector<int>> Graph::randomizedHeuristic(float alfa, int numIt, int seed)
             }
 
             float t = 0; // Tempo total da viagem
-
+            int count_index_aux = 0;
             while (t < td[i])
             {
+                //Corrigir aqui: Verificar se a solução do dia atual esta vazia -> 
                 pos = randomRange(0, static_cast<int>(candidates.size() - 1) * alfa);
                 aux.push_back(candidates.at(pos).first);
-                visiteds.push_back(candidates.at(pos).first);
-                t += this->get_node(candidates.at(pos).first)->get_edge(first_node->id)->dist; // Somar o tempo da viagem
+                count_index_aux++;
+                t += this->get_node(aux[count_index_aux-1])->get_edge(aux[count_index_aux])->dist; // Corrigir a contagem de distância;
                 auxScore += this->get_node(candidates.at(pos).first)->points;
 
                 if (t > td[i]) // Se o tempo da viagem for maior que o tempo disponível, remover o nó e inserir

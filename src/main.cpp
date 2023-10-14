@@ -10,6 +10,7 @@
 #include <cstring>
 #include <math.h>
 #include <time.h>
+#include <chrono>
 
 using namespace std;
 
@@ -243,6 +244,10 @@ int main(int argc, char const *argv[])
         cout << "-> Encerrando programa..." << endl;
         return 1;
     }
+    using std::chrono::high_resolution_clock;
+    using std::chrono::duration_cast;
+    using std::chrono::duration;
+    using std::chrono::milliseconds;
 
     string instance_path(argv[1]);
     ifstream instance_file;
@@ -260,14 +265,19 @@ int main(int argc, char const *argv[])
         cout << "____________________________________________________" << endl;
 
         cout << "-> Iniciando busca heurística..." << endl;
+        auto t1 = high_resolution_clock::now();
         // Setando a seed para o random
-        vector<vector<int>> solution = new_graph->randomizedHeuristic(0.15, 10000, 42);
+        vector<vector<int>> solution = new_graph->randomizedHeuristic(0.15, 1000, 42);
+        auto t2 = high_resolution_clock::now();
+
+        duration<float, std::milli> ms_double = t2 - t1;
 
         cout << "-> Printando solução..." << endl;
         cout << "____________________________________________________" << endl;
 
         cout << "-> Solução encontrada: " << endl;
         float benefit = 0;
+        float duration = 0;
         for (int i = 0; i < solution.size(); i++)
         {
             cout << "-> Dia " << i + 1 << ": ";
@@ -277,12 +287,17 @@ int main(int argc, char const *argv[])
                 if (j != 0)
                 {
                     benefit += new_graph->get_node(solution[i][j])->points;
+                    if(j < (solution[i].size()-2)){
+                    duration += new_graph->get_node(solution[i][j])->get_edge(solution[i][j+1])->dist;
+                    }
                 }
             }
             cout << endl;
         }
 
         cout << "-> Pontuação total: " << benefit << endl;
+        cout << "-> Duração total do passeio: " << duration << endl;
+        cout << "-> Tempo de execução (ms): " << ms_double.count() << endl;
     }
     else
     {
