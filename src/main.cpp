@@ -230,7 +230,7 @@ Graph *build_graph(ifstream &instance)
 
 int main(int argc, char const *argv[])
 {
-    srand(time (0));
+    srand(time(0));
     cout << "######################################### BEM VINDO #########################################" << endl;
     cout << "_____________________________________________________________________________________________" << endl;
 
@@ -244,9 +244,9 @@ int main(int argc, char const *argv[])
         cout << "-> Encerrando programa..." << endl;
         return 1;
     }
-    using std::chrono::high_resolution_clock;
-    using std::chrono::duration_cast;
     using std::chrono::duration;
+    using std::chrono::duration_cast;
+    using std::chrono::high_resolution_clock;
     using std::chrono::milliseconds;
 
     string instance_path(argv[1]);
@@ -267,7 +267,7 @@ int main(int argc, char const *argv[])
         cout << "-> Iniciando busca heurística..." << endl;
         auto t1 = high_resolution_clock::now();
         // Setando a seed para o random
-        vector<vector<int>> solution = new_graph->randomizedHeuristic(0.15, 1000, 42);
+        vector<vector<int>> solution = new_graph->randomizedHeuristic(0.15, 100, 42);
         auto t2 = high_resolution_clock::now();
 
         duration<float, std::milli> ms_double = t2 - t1;
@@ -287,8 +287,9 @@ int main(int argc, char const *argv[])
                 if (j != 0)
                 {
                     benefit += new_graph->get_node(solution[i][j])->points;
-                    if(j < (solution[i].size()-2)){
-                    duration += new_graph->get_node(solution[i][j])->get_edge(solution[i][j+1])->dist;
+                    if (j < (solution[i].size() - 2))
+                    {
+                        duration += new_graph->get_node(solution[i][j])->get_edge(solution[i][j + 1])->dist;
                     }
                 }
             }
