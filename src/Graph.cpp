@@ -169,6 +169,11 @@ bool Graph::search_node(int id)
     }
 }
 
+/**
+ * @brief         Função utilizada para criar o vetor de candidatos do problema;
+ *
+ * @return vector<pair<int, double>>  Retorna o conjunto de pontos candidatos, com o id do nó e a razão entre os pontos e a distância;
+ */
 vector<pair<int, double>> Graph::createCandidates()
 {
     vector<pair<int, double>> candidates;
@@ -191,6 +196,11 @@ vector<pair<int, double>> Graph::createCandidates()
     return candidates;
 }
 
+/**
+ * @brief         Função utilizada para criar o vetor de candidatos dos hotéis do problema;
+ *
+ * @return vector<int>  Retorna o conjunto de hotéis candidatos;
+ */
 vector<int> Graph::createHotelsCandidates()
 {
     vector<int> candidates;
@@ -208,11 +218,17 @@ vector<int> Graph::createHotelsCandidates()
         node = node->next_node;
     }
 
-    candidates.push_back(first_node->next_node->id);
+    candidates.push_back(first_node->next_node->id); // O último hotel fica no final do vetor
 
     return candidates;
 }
 
+/**
+ * @brief         Função utilizada para atualizar o vetor de candidatos do problema em cada iteração;
+ *
+ * @param node    Nó que foi inserido na solução;
+ * @return vector<pair<int, double>>  Retorna o conjunto de pontos candidatos, com o id do nó e a razão entre os pontos e a distância;
+ */
 vector<pair<int, double>> Graph::updateCandidates(vector<pair<int, double>> *candidates, Node *node)
 {
     vector<pair<int, double>> aux;
@@ -242,6 +258,13 @@ int verify_visited(int id, vector<int> solution)
     return 0;
 }
 
+/**
+ * @brief         Função utilizada para gerar um número aleatório dentro de um intervalo;
+ *
+ * @param min     Valor mínimo do intervalo;
+ * @param max     Valor máximo do intervalo;
+ * @return int    Retorna o número aleatório gerado;
+ */
 int randomRange(int min, int max)
 {
     return min + rand() % (max - min + 1);
@@ -314,6 +337,13 @@ float Graph::get_ls_points(vector<int> solution)
     return points_1 + points_2;
 }
 
+/**
+ * @brief         Algoritmo randomizado adaptativo, junto com a busca local;
+ *
+ * @param alfa    Parâmetro de aleatoriedade;
+ * @param numIt   Número de iterações;
+ * @param seed    Semente para o gerador de números aleatórios;
+ */
 vector<vector<int>> Graph::randomizedHeuristic(float alfa, int numIt, int seed)
 {
     vector<int> visiteds;
