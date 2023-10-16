@@ -360,8 +360,8 @@ vector<vector<int>> Graph::randomizedHeuristic(float alfa, int numIt, int seed)
         vector<int> hotelsCandidates = this->createHotelsCandidates();
         int pos = randomRange(0, static_cast<int>(candidates.size() - 1) * alfa);
 
-        if (it == 0)
-            cout << "Pos: " << pos << endl;
+        // if (it == 0)
+        //     // cout << "Pos: " << pos << endl;
 
         int days = this->td.size();
 

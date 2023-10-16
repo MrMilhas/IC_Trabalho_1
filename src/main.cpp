@@ -11,6 +11,7 @@
 #include <math.h>
 #include <time.h>
 #include <chrono>
+#include <random>
 
 using namespace std;
 
@@ -228,6 +229,103 @@ Graph *build_graph(ifstream &instance)
     return new_graph;
 }
 
+void analiseDados(Graph *new_graph)
+{
+    // Alfas a serem testados
+    std::vector<double> alphas = {0.05, 0.15, 0.5, 0.75, 0.95};
+    int num_iterations = 500;
+    int num_repetitions = 10;
+
+    // Abrir arquivo de saída para salvar os resultados
+    std::ofstream output_file("resultados2.txt");
+
+    // Loop sobre os diferentes valores de alpha
+    for (double alpha : alphas)
+    {
+        std::vector<float> scores;
+        std::vector<float> durations;
+
+        float best_score = 0; // Rastrear o melhor valor de pontuação
+        for (int repetition = 0; repetition < num_repetitions; repetition++)
+        {
+            // Executar o algoritmo randomizado
+            auto t1 = std::chrono::high_resolution_clock::now();
+            // Substitua os argumentos abaixo pelos valores desejados
+            std::vector<std::vector<int>> solution = new_graph->randomizedHeuristic(alpha, num_iterations, 42);
+            auto t2 = std::chrono::high_resolution_clock::now();
+
+            // Calcular a pontuação e a duração do passeio
+            float benefit = 0;
+            float duration = 0;
+            for (int i = 0; i < solution.size(); i++)
+            {
+                for (int j = 0; j < solution[i].size(); j++)
+                {
+                    if (j != 0)
+                    {
+                        benefit += new_graph->get_node(solution[i][j])->points;
+                        if (j < (solution[i].size() - 2))
+                        {
+                            duration += new_graph->get_node(solution[i][j])->get_edge(solution[i][j + 1])->dist;
+                        }
+                    }
+                }
+            }
+
+            // Atualizar o melhor valor de pontuação, se necessário
+            if (benefit > best_score)
+            {
+                best_score = benefit;
+            }
+
+            // Armazenar resultados
+            scores.push_back(benefit);
+            durations.push_back(duration);
+
+            // Calcular tempo de execução
+            std::chrono::duration<float, std::milli> ms_double = t2 - t1;
+
+            // Salvar resultados no arquivo de saída
+            output_file << "Alpha: " << alpha << ", Repetição: " << repetition + 1 << std::endl;
+            output_file << "Pontuação: " << benefit << std::endl;
+            output_file << "Duração do Passeio: " << duration << std::endl;
+            output_file << "Tempo de Execução (ms): " << ms_double.count() << std::endl;
+            output_file << "_________________________" << std::endl;
+        }
+
+        // Calcular média e desvio padrão das pontuações e durações
+        float mean_score = std::accumulate(scores.begin(), scores.end(), 0.0) / scores.size();
+        float mean_duration = std::accumulate(durations.begin(), durations.end(), 0.0) / durations.size();
+
+        float score_variance = 0;
+        float duration_variance = 0;
+
+        for (float score : scores)
+        {
+            score_variance += (score - mean_score) * (score - mean_score);
+        }
+        for (float duration : durations)
+        {
+            duration_variance += (duration - mean_duration) * (duration - mean_duration);
+        }
+
+        score_variance /= scores.size();
+        duration_variance /= durations.size();
+
+        float score_stddev = std::sqrt(score_variance);
+        float duration_stddev = std::sqrt(duration_variance);
+
+        // Salvar média, desvio padrão e o melhor valor de pontuação no arquivo de saída
+        output_file << "Alpha: " << alpha << std::endl;
+        output_file << "Média das Pontuações: " << mean_score << std::endl;
+        output_file << "Desvio Padrão das Pontuações: " << score_stddev << std::endl;
+        output_file << "Melhor Pontuação: " << best_score << std::endl;
+        output_file << "_________________________" << std::endl;
+    }
+
+    output_file.close();
+}
+
 int main(int argc, char const *argv[])
 {
     srand(time(0));
@@ -255,50 +353,52 @@ int main(int argc, char const *argv[])
 
     if (instance_file.is_open())
     {
-        cout << "-> Arquivo aberto com sucesso!" << endl;
-        cout << "____________________________________________________" << endl;
+        // cout << "-> Arquivo aberto com sucesso!" << endl;
+        // cout << "____________________________________________________" << endl;
 
-        cout << "-> Iniciando construção do grafo..." << endl;
-        Graph *new_graph = build_graph(instance_file);
+        // cout << "-> Iniciando construção do grafo..." << endl;
+        // Graph *new_graph = build_graph(instance_file);
 
-        cout << "-> Grafo construído com sucesso!" << endl;
-        cout << "____________________________________________________" << endl;
+        // cout << "-> Grafo construído com sucesso!" << endl;
+        // cout << "____________________________________________________" << endl;
 
-        cout << "-> Iniciando busca heurística..." << endl;
-        auto t1 = high_resolution_clock::now();
-        // Setando a seed para o random
-        vector<vector<int>> solution = new_graph->randomizedHeuristic(0.15, 100, 42);
-        auto t2 = high_resolution_clock::now();
+        // cout << "-> Iniciando busca heurística..." << endl;
+        // auto t1 = high_resolution_clock::now();
+        // // Setando a seed para o random
+        // vector<vector<int>> solution = new_graph->randomizedHeuristic(0.15, 100, 42);
+        // auto t2 = high_resolution_clock::now();
 
-        duration<float, std::milli> ms_double = t2 - t1;
+        // duration<float, std::milli> ms_double = t2 - t1;
 
-        cout << "-> Printando solução..." << endl;
-        cout << "____________________________________________________" << endl;
+        // cout << "-> Printando solução..." << endl;
+        // cout << "____________________________________________________" << endl;
 
-        cout << "-> Solução encontrada: " << endl;
-        float benefit = 0;
-        float duration = 0;
-        for (int i = 0; i < solution.size(); i++)
-        {
-            cout << "-> Dia " << i + 1 << ": ";
-            for (int j = 0; j < solution[i].size(); j++)
-            {
-                cout << solution[i][j] << " ";
-                if (j != 0)
-                {
-                    benefit += new_graph->get_node(solution[i][j])->points;
-                    if (j < (solution[i].size() - 2))
-                    {
-                        duration += new_graph->get_node(solution[i][j])->get_edge(solution[i][j + 1])->dist;
-                    }
-                }
-            }
-            cout << endl;
-        }
+        // cout << "-> Solução encontrada: " << endl;
+        // float benefit = 0;
+        // float duration = 0;
+        // for (int i = 0; i < solution.size(); i++)
+        // {
+        //     cout << "-> Dia " << i + 1 << ": ";
+        //     for (int j = 0; j < solution[i].size(); j++)
+        //     {
+        //         cout << solution[i][j] << " ";
+        //         if (j != 0)
+        //         {
+        //             benefit += new_graph->get_node(solution[i][j])->points;
+        //             if (j < (solution[i].size() - 2))
+        //             {
+        //                 duration += new_graph->get_node(solution[i][j])->get_edge(solution[i][j + 1])->dist;
+        //             }
+        //         }
+        //     }
+        //     cout << endl;
+        // }
 
-        cout << "-> Pontuação total: " << benefit << endl;
-        cout << "-> Duração total do passeio: " << duration << endl;
-        cout << "-> Tempo de execução (ms): " << ms_double.count() << endl;
+        // cout << "-> Pontuação total: " << benefit << endl;
+        // cout << "-> Duração total do passeio: " << duration << endl;
+        // cout << "-> Tempo de execução (ms): " << ms_double.count() << endl;
+
+        analiseDados(build_graph(instance_file));
     }
     else
     {
