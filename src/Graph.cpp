@@ -488,19 +488,81 @@ vector<vector<int>> Graph::randomizedHeuristic(float alfa, int numIt, int seed)
 //* ===============================================================================================================
 
 /**
- * @brief Estrutura da partícula;
+ * @brief Grasp simples para inicializar as partículas;
  * 
+ * @return vector<vector<int>> Retorna a solução gerada pelo Grasp;
  */
-struct particle {
-    vector<vector<int>> atual_position;        //& Posição atual da partícula;
-    vector<vector<int>> best_local_position;   //& Melhor posição da partícula;
-    vector<vector<int>> best_global_position;  //& Melhor posição global;
-    vector<vector<pair<int, int>>> speed;      //& Velocidade da partícula;
+vector<vector<int>> Graph::simple_grasp (){
+    vector<vector<vector<int>>> solutions;
+    vector<vector<int>> solution;
+    vector<pair<int, double>> candidates = this->createCandidates();
+    vector<int> hotelsCandidates = this->createHotelsCandidates();
 
-    float points;              //& Pontuação atual da partícula;
-    float best_local_points;   //& Melhor pontuação da partícula;
-    float best_global_points;  //& Melhor pontuação global;
-};
+    int days = td.size();
+
+    // Cada dia gera uma solução diferente, a solução final é um conjunto de soluções
+    for (int i = 0; i < days; i++)
+    {
+        vector<int> aux;
+        if (solution.size() == 0) // O primeiro dia começa do primeiro hotel
+        {
+            aux.push_back(hotelsCandidates[0]);
+        }
+        else
+        {
+            aux.push_back(solution[i - 1].back()); // Se não for o primeiro dia, os demais começam com o hotel do dia anterior
+        }
+
+        float t = 0; // Tempo total da viagem
+        int count_index_aux = 0;
+        while (t < td[i])
+        {
+            aux.push_back(candidates[0].first);
+            count_index_aux++;
+            t += this->get_node(aux[count_index_aux - 1])->get_edge(aux[count_index_aux])->dist; // Somar o tempo da viagem
+
+            if (t > td[i]) // Se o tempo da viagem for maior que o tempo disponível, remover o nó e inserir
+            {
+                aux.pop_back();
+
+                // Buscar o hotel mais próximo
+                float min = 999999999;
+                Node *hotel = nullptr;
+
+                if (i == days - 1)
+                {
+                    aux.push_back(hotelsCandidates.back());
+                    break;
+                }
+                else
+                {
+
+                    for (int i = 0; i < hotelsCandidates.size(); i++)
+                    {
+                        Node *nodeAux = this->get_node(hotelsCandidates[i]);
+                        float dist = this->get_node(aux[aux.size() - 1])->get_edge(nodeAux->id)->dist;
+
+                        if (dist < min)
+                        {
+                            min = dist;
+                            hotel = nodeAux;
+                        }
+                    }
+                    aux.push_back(hotel->id);
+                }
+                t = 0;
+                break;
+            }
+
+            candidates.erase(candidates.begin());
+            candidates = this->updateCandidates(&candidates, this->get_node(aux[aux.size() - 1]));
+        }
+        t = 0;
+        solution.push_back(aux);
+    }
+
+    return solution;
+}
 
 /**
  * @brief Função para inicializar o conjunto de partículas;
@@ -508,12 +570,15 @@ struct particle {
  * @param n_particles       Número de partículas a serem criadas;
  * @return vector<particle> Retorna o conjunto de partículas;
  */
-vector<particle> initialize_particles (int n_particles){
+vector<particle> Graph::initialize_particles (int n_particles){
     vector<particle> particles;
 
     for(int i=0; i<n_particles; i++){
         //^ Rodar um grasp simples (sem busca local) para cada partícula de forma
         //^ a obter a solução inicial de cada uma;
+        particle p;
+        p.atual_position = this->simple_grasp();
+        particles.push_back(p);
     }
 
     return particles;
@@ -525,9 +590,15 @@ vector<particle> initialize_particles (int n_particles){
  * @param p      Partícula p;
  * @return float Retorna a pontuação da partícula p;
  */
-float calculate_points (particle p){
-    float points;
+float Graph::calculate_points (particle p){
+    float points = 0;
     
+    for (int i=0; i<p.atual_position.size(); i++){
+        for (int j=0; j<p.atual_position[i].size(); i++){
+            //^ Somar os pontos aqui;
+        }
+    }
+
     return points;
 }
 
@@ -538,7 +609,7 @@ float calculate_points (particle p){
  * @param p2                              Partícula alvo;
  * @return vector<vector<pair<int, int>>> Retorna a velocidade necessária para ir de p1 para p2;
  */
-vector<vector<pair<int, int>>> subtract_positions (vector<vector<int>> p1, vector<vector<int>> p2){
+vector<vector<pair<int, int>>> Graph::subtract_positions (vector<vector<int>> p1, vector<vector<int>> p2){
     vector<vector<pair<int, int>>> speed;
 
     return speed;
@@ -564,7 +635,7 @@ int rand (){
  * @param c2                              Componente social;
  * @return vector<vector<pair<int, int>>> Retorna a nova velocidade da partícula;
  */
-vector<vector<pair<int, int>>> calculate_speed (particle p, float w, float c1, float c2){
+vector<vector<pair<int, int>>> Graph::calculate_speed (particle p, float w, float c1, float c2){
     vector<vector<pair<int, int>>> new_speed;
     
     return new_speed;
@@ -576,13 +647,13 @@ vector<vector<pair<int, int>>> calculate_speed (particle p, float w, float c1, f
  * @param p                    Partícula;
  * @return vector<vector<int>> Retorna a posição calculada da partícula;
  */
-vector<vector<int>> calculate_position (particle p){
+vector<vector<int>> Graph::calculate_position (particle p){
     vector<vector<int>> position;
     //^ Otimizar a seleção de hotéis aqui nesta função;
     return position;
 }
 
-vector<vector<int>> particle_cloud (int max_it, int n_particles, float w, float c1, float c2){
+vector<vector<int>> Graph::particle_cloud (int max_it, int n_particles, float w, float c1, float c2){
     //^ ETAPA 0: Inicializar variáveis globais ==>
     float best_global_points = -999;           //& Melhor pontuação global;
     vector<vector<int>> best_global_position;  //& Melhor posição global;
