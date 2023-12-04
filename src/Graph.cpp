@@ -169,6 +169,9 @@ bool Graph::search_node(int id)
     }
 }
 
+//* GRASP and Local Search ========================================================================================
+//* ===============================================================================================================
+
 /**
  * @brief         Função utilizada para criar o vetor de candidatos do problema;
  *
@@ -479,4 +482,144 @@ vector<vector<int>> Graph::randomizedHeuristic(float alfa, int numIt, int seed)
         it++;
     }
     return bestSolution;
+}
+
+//* Nuvem de Partículas ===========================================================================================
+//* ===============================================================================================================
+
+/**
+ * @brief Estrutura da partícula;
+ * 
+ */
+struct particle {
+    vector<vector<int>> atual_position;        //& Posição atual da partícula;
+    vector<vector<int>> best_local_position;   //& Melhor posição da partícula;
+    vector<vector<int>> best_global_position;  //& Melhor posição global;
+    vector<vector<pair<int, int>>> speed;      //& Velocidade da partícula;
+
+    float points;              //& Pontuação atual da partícula;
+    float best_local_points;   //& Melhor pontuação da partícula;
+    float best_global_points;  //& Melhor pontuação global;
+};
+
+/**
+ * @brief Função para inicializar o conjunto de partículas;
+ * 
+ * @param n_particles       Número de partículas a serem criadas;
+ * @return vector<particle> Retorna o conjunto de partículas;
+ */
+vector<particle> initialize_particles (int n_particles){
+    vector<particle> particles;
+
+    for(int i=0; i<n_particles; i++){
+        //^ Rodar um grasp simples (sem busca local) para cada partícula de forma
+        //^ a obter a solução inicial de cada uma;
+    }
+
+    return particles;
+}
+
+/**
+ * @brief Função utilizada para calcular a pontuação atual da partícula;
+ * 
+ * @param p      Partícula p;
+ * @return float Retorna a pontuação da partícula p;
+ */
+float calculate_points (particle p){
+    float points;
+    
+    return points;
+}
+
+/**
+ * @brief Função para calcular a distância (Hamming) entre duas partículas (p2 - p1);
+ * 
+ * @param p1                              Partícula base;
+ * @param p2                              Partícula alvo;
+ * @return vector<vector<pair<int, int>>> Retorna a velocidade necessária para ir de p1 para p2;
+ */
+vector<vector<pair<int, int>>> subtract_positions (vector<vector<int>> p1, vector<vector<int>> p2){
+    vector<vector<pair<int, int>>> speed;
+
+    return speed;
+}
+
+/**
+ * @brief Função aleatória que definirá se uma componente será usada ou não na iteração atual;
+ * 
+ * @return int Retorna 1 ou 0;
+ */
+int rand (){
+    int state;
+    
+    return state;
+}
+
+/**
+ * @brief Função para calcular a velocidade da partícula;
+ * 
+ * @param p                               Partícula que irá atualizar sua velocidade;
+ * @param w                               Coeficiente de inércia;
+ * @param c1                              Componente cognitiva;
+ * @param c2                              Componente social;
+ * @return vector<vector<pair<int, int>>> Retorna a nova velocidade da partícula;
+ */
+vector<vector<pair<int, int>>> calculate_speed (particle p, float w, float c1, float c2){
+    vector<vector<pair<int, int>>> new_speed;
+    
+    return new_speed;
+}
+
+/**
+ * @brief Função utilizada para atualizar a posição da partícula;
+ * 
+ * @param p                    Partícula;
+ * @return vector<vector<int>> Retorna a posição calculada da partícula;
+ */
+vector<vector<int>> calculate_position (particle p){
+    vector<vector<int>> position;
+    //^ Otimizar a seleção de hotéis aqui nesta função;
+    return position;
+}
+
+vector<vector<int>> particle_cloud (int max_it, int n_particles, float w, float c1, float c2){
+    //^ ETAPA 0: Inicializar variáveis globais ==>
+    float best_global_points = -999;           //& Melhor pontuação global;
+    vector<vector<int>> best_global_position;  //& Melhor posição global;
+    
+    //^ ETAPA 1: Inicializar as partículas ==>
+    vector<particle> particles = initialize_particles(n_particles);  //& Conjunto de partículas;
+
+    //^ ETAPA 2: Executar iterações do algoritmo ==>
+    for (int i=0; i<max_it; i++){
+        //^ 2.1: Atualizar pontuações das partículas -->
+        for (int j=0; j<particles.size(); j++){
+            particles[j].points = calculate_points(particles[j]);
+
+            if(particles[j].points > particles[j].best_local_points){
+                particles[j].best_local_points = particles[j].points;
+                particles[j].best_local_position = particles[j].atual_position;
+            }
+        }
+
+        //^ 2.2: Atualizar melhor pontuação global -->
+        for (int j=0; j<particles.size(); j++){
+            if(particles[j].best_local_points > best_global_points){
+                best_global_points = particles[j].best_local_points;
+                best_global_position = particles[j].best_local_position;
+                
+                particles[j].best_global_points = best_global_points;
+                particles[j].best_global_position = best_global_position;
+            }
+        }
+
+        //^ 2.3: Atualizar velocidades e calcular posições -->
+        for (int j=0; j<particles.size(); j++){
+            particles[j].speed = calculate_speed(particles[j], w, c1, c2);
+            particles[j].atual_position = calculate_position(particles[j]);
+        }
+    }
+
+    //^ ETAPA 3: Retornar a melhor solução ==>
+    return best_global_position;
 }
