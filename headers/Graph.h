@@ -12,10 +12,10 @@ using namespace std;
  * 
  */
 struct particle {
-    vector<vector<int>> atual_position;        //& Posição atual da partícula;
-    vector<vector<int>> best_local_position;   //& Melhor posição da partícula;
-    vector<vector<int>> best_global_position;  //& Melhor posição global;
-    vector<vector<pair<int, int>>> speed;      //& Velocidade da partícula;
+    vector<vector<int>> atual_position;                      //& Posição atual da partícula;
+    vector<vector<int>> best_local_position;                 //& Melhor posição da partícula;
+    vector<vector<int>> best_global_position;                //& Melhor posição global;
+    vector<vector<pair<string, pair<int, int>>>> speed;      //& Velocidade da partícula;
 
     float points;              //& Pontuação atual da partícula;
     float best_local_points;   //& Melhor pontuação da partícula;
@@ -56,8 +56,8 @@ public:
     
     vector<particle> initialize_particles (int n_particles);
     float calculate_points (particle p);
-    vector<vector<pair<int, int>>> subtract_positions (vector<vector<int>> p1, vector<vector<int>> p2);
-    vector<vector<pair<int, int>>> calculate_speed (particle p, float w, float c1, float c2);
+    vector<vector<pair<string, pair<int, int>>>> subtract_positions (vector<vector<int>> p1, vector<vector<int>> p2);
+    vector<vector<pair<string, pair<int, int>>>> calculate_speed (particle p, float w, float c1, float c2);
     vector<vector<int>> calculate_position (particle p);
     
     vector<vector<int>> heuristic();                                                             //~ Função heurística;
