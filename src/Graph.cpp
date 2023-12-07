@@ -595,7 +595,7 @@ float Graph::calculate_points (particle p){
     
     for (int i=0; i<p.atual_position.size(); i++){
         for (int j=0; j<p.atual_position[i].size(); i++){
-            //^ Somar os pontos aqui;
+            points += this->get_node(p.atual_position[i][j])->points;
         }
     }
 
@@ -609,8 +609,45 @@ float Graph::calculate_points (particle p){
  * @param p2                              Partícula alvo;
  * @return vector<vector<pair<int, int>>> Retorna a velocidade necessária para ir de p1 para p2;
  */
-vector<vector<pair<int, int>>> Graph::subtract_positions (vector<vector<int>> p1, vector<vector<int>> p2){
-    vector<vector<pair<int, int>>> speed;
+vector<vector<pair<string, pair<int, int>>>> Graph::subtract_positions (vector<vector<int>> p1, vector<vector<int>> p2){
+    vector<vector<pair<string, pair<int, int>>>> speed;
+
+    for(int i=0; i<p2.size(); i++){
+        if(p2[i].size() > p1[i].size()){
+            //^ Avalia os nós extras de p2 e cria o movimento "add" para colocar-los em p1 -->
+            for(int j=0; j<p2[i].size(); j++){
+                if(!(std::find(p1[i].begin(), p1[i].end(), p2[i][j]) != p1[i].end())) {
+                    speed[i].push_back(make_pair("add", make_pair(j, p2[i][j])));
+                    p2[i].erase(p2[i].begin()+j); //~ Apaga de p2 os nós extras para p2 e p1 terem o mesmo tamanho;
+                }
+            }
+            //^ Com p1 e p2 do mesmo tamanho, avalia os nós diferentes entre p2 e p1 -->
+            for(int j=0; j<p2[i].size(); j++){
+                //^ Se o nó de p2 não existe em p1, cria o movimento "sub" para substituir o nó de p1 pelo de p2 -->
+                if(p2[i][j] != p1[i][j]){
+                    if(!(std::find(p1[i].begin(), p1[i].end(), p2[i][j]) != p1[i].end())){
+                        speed[i].push_back(make_pair("sub", make_pair(j, p2[i][j])));
+                    }
+                    //^ Se o nó de p2 existem em p1, procura sua posição e cria o movimento "sitwch" para trocar as posições -->
+                    else{
+                        for(int k=0; k<p1[i].size(); k++){
+                            if(p1[i][k] == p2[i][j]){
+                                speed[i].push_back(make_pair("swich", make_pair(j, k)));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        else{
+            if(p2[i].size() < p1[i].size()){
+
+            }
+            else{
+
+            }
+        }
+    }
 
     return speed;
 }
@@ -635,8 +672,8 @@ int rand (){
  * @param c2                              Componente social;
  * @return vector<vector<pair<int, int>>> Retorna a nova velocidade da partícula;
  */
-vector<vector<pair<int, int>>> Graph::calculate_speed (particle p, float w, float c1, float c2){
-    vector<vector<pair<int, int>>> new_speed;
+vector<vector<pair<string, pair<int, int>>>> Graph::calculate_speed (particle p, float w, float c1, float c2){
+    vector<vector<pair<string, pair<int, int>>>> new_speed;
     
     return new_speed;
 }
