@@ -494,75 +494,103 @@ vector<vector<int>> Graph::randomizedHeuristic(float alfa, int numIt, int seed)
  */
 vector<vector<int>> Graph::simple_grasp()
 {
-    vector<vector<vector<int>>> solutions;
+    vector<int> visiteds;
     vector<vector<int>> solution;
-    vector<pair<int, double>> candidates = this->createCandidates();
-    vector<int> hotelsCandidates = this->createHotelsCandidates();
+    vector<vector<int>> bestSolution;
+    float bestScore = 0;
+    float auxScore = 0;
 
-    int days = td.size();
+    int it = 0;
 
-    // Cada dia gera uma solução diferente, a solução final é um conjunto de soluções
-    for (int i = 0; i < days; i++)
+    while (it < 300)
     {
-        vector<int> aux;
-        if (solution.size() == 0) // O primeiro dia começa do primeiro hotel
-        {
-            aux.push_back(hotelsCandidates[0]);
-        }
-        else
-        {
-            aux.push_back(solution[i - 1].back()); // Se não for o primeiro dia, os demais começam com o hotel do dia anterior
-        }
+        vector<pair<int, double>> candidates = this->createCandidates();
+        vector<int> hotelsCandidates = this->createHotelsCandidates();
+        int pos = randomRange(0, static_cast<int>(candidates.size() - 1) * 0.5);
 
-        float t = 0; // Tempo total da viagem
-        int count_index_aux = 0;
-        while (t < td[i])
-        {
-            aux.push_back(candidates[0].first);
-            count_index_aux++;
-            t += this->get_node(aux[count_index_aux - 1])->get_edge(aux[count_index_aux])->dist; // Somar o tempo da viagem
+        // if (it == 0)
+        //     // cout << "Pos: " << pos << endl;
 
-            if (t > td[i]) // Se o tempo da viagem for maior que o tempo disponível, remover o nó e inserir
+        int days = this->td.size();
+
+        // Cada dia gera uma solução diferente, a solução final é um conjunto de soluções
+        for (int i = 0; i < days; i++)
+        {
+            vector<int> aux;
+            if (solution.size() == 0) // O primeiro dia começa do primeiro hotel
             {
-                aux.pop_back();
+                aux.push_back(hotelsCandidates[0]);
+            }
+            else
+            {
+                aux.push_back(solution[i - 1].back()); // Se não for o primeiro dia, os demais começam com o hotel do dia anterior
+            }
 
-                // Buscar o hotel mais próximo
-                float min = 999999999;
-                Node *hotel = nullptr;
+            float t = 0; // Tempo total da viagem
+            int count_index_aux = 0;
+            while (t < td[i])
+            {
+                // Corrigir aqui: Verificar se a solução do dia atual esta vazia ->
+                pos = randomRange(0, static_cast<int>(candidates.size() - 1) * 0.5);
+                aux.push_back(candidates.at(pos).first);
+                count_index_aux++;
+                t += this->get_node(aux[count_index_aux - 1])->get_edge(aux[count_index_aux])->dist; // Corrigir a contagem de distância;
+                auxScore += this->get_node(candidates.at(pos).first)->points;
 
-                if (i == days - 1)
+                if (t > td[i]) // Se o tempo da viagem for maior que o tempo disponível, remover o nó e inserir
                 {
-                    aux.push_back(hotelsCandidates.back());
+                    aux.pop_back();
+
+                    // Buscar o hotel mais próximo
+                    float min = 999999999;
+                    Node *hotel = nullptr;
+
+                    if (i == days - 1)
+                    {
+                        aux.push_back(hotelsCandidates.back());
+                        break;
+                    }
+                    else
+                    {
+
+                        for (int i = 0; i < hotelsCandidates.size(); i++)
+                        {
+                            Node *nodeAux = this->get_node(hotelsCandidates[i]);
+                            float dist = this->get_node(aux[aux.size() - 1])->get_edge(nodeAux->id)->dist;
+
+                            if (dist < min)
+                            {
+                                min = dist;
+                                hotel = nodeAux;
+                            }
+                        }
+                        aux.push_back(hotel->id);
+                    }
+                    t = 0;
                     break;
                 }
                 else
                 {
-
-                    for (int i = 0; i < hotelsCandidates.size(); i++)
-                    {
-                        Node *nodeAux = this->get_node(hotelsCandidates[i]);
-                        float dist = this->get_node(aux[aux.size() - 1])->get_edge(nodeAux->id)->dist;
-
-                        if (dist < min)
-                        {
-                            min = dist;
-                            hotel = nodeAux;
-                        }
-                    }
-                    aux.push_back(hotel->id);
+                    candidates.erase(candidates.begin() + pos);
                 }
-                t = 0;
-                break;
+                candidates = this->updateCandidates(&candidates, this->get_node(aux[aux.size() - 1]));
             }
-
-            candidates.erase(candidates.begin());
-            candidates = this->updateCandidates(&candidates, this->get_node(aux[aux.size() - 1]));
+            t = 0;
+            solution.push_back(aux);
         }
-        t = 0;
-        solution.push_back(aux);
-    }
 
-    return solution;
+        if (auxScore > bestScore)
+        {
+            bestScore = auxScore;
+            bestSolution = solution;
+        }
+
+        auxScore = 0;
+        solution.clear();
+        it++;
+    }
+    return bestSolution;
+
 }
 
 /**
@@ -581,6 +609,12 @@ vector<particle> Graph::initialize_particles(int n_particles)
         //^ a obter a solução inicial de cada uma;
         particle p;
         p.atual_position = this->simple_grasp();
+
+        for(int i=0; i<this->d; i++){
+            vector<pair<string, pair<int, int>>> aux;
+            p.speed.push_back(aux);
+        }
+
         particles.push_back(p);
     }
 
@@ -604,7 +638,6 @@ float Graph::calculate_points(particle p)
             points += this->get_node(p.atual_position[i][j])->points;
         }
     }
-
     return points;
 }
 
@@ -618,7 +651,6 @@ float Graph::calculate_points(particle p)
 vector<vector<pair<string, pair<int, int>>>> Graph::subtract_positions(vector<vector<int>> p1, vector<vector<int>> p2)
 {
     vector<vector<pair<string, pair<int, int>>>> speed;
-
     for (int i = 0; i < p2.size(); i++)
     {
         if (p2[i].size() > p1[i].size())
@@ -742,11 +774,11 @@ vector<pair<string, pair<int, int>>> Graph::create_rand_moves(const vector<vecto
     vector<pair<string, pair<int, int>>> rand_moves;
 
     // Define a probabilidade de cada tipo de movimento
-    float prob_add = 0.2;         // Probabilidade de adicionar um nó
-    float prob_pop = 0.2;         // Probabilidade de remover um nó
-    float prob_sub = 0.2;         // Probabilidade de substituir um nó
-    float prob_swich = 0.2;       // Probabilidade de trocar a posição de dois nós
-    float prob_hotel_swich = 0.2; // Probabilidade de trocar a posição de dois hotéis
+    float prob_add = 0.8;         // Probabilidade de adicionar um nó
+    float prob_pop = 0.8;         // Probabilidade de remover um nó
+    float prob_sub = 0.8;         // Probabilidade de substituir um nó
+    float prob_swich = 0.8;       // Probabilidade de trocar a posição de dois nós
+    float prob_hotel_swich = 0.8; // Probabilidade de trocar a posição de dois hotéis
 
     // Itera sobre a solução para criar movimentos aleatórios
     for (int day = 0; day < current_solution.size(); day++)
@@ -843,30 +875,70 @@ vector<vector<pair<string, pair<int, int>>>> Graph::calculate_speed(particle p, 
     vector<vector<pair<string, pair<int, int>>>> cog_speed = subtract_positions(p.atual_position, p.best_local_position);
     vector<vector<pair<string, pair<int, int>>>> soc_speed = subtract_positions(p.atual_position, p.best_global_position);
 
+    for(int i=0; i<this->d; i++){
+        vector<pair<string, pair<int, int>>> aux;
+        rand_speed.push_back(aux);
+        new_speed.push_back(aux);
+    }
+
+    if(cog_speed.size() == 0){
+        for(int i=0; i<this->d; i++){
+            vector<pair<string, pair<int, int>>> aux;
+            cog_speed.push_back(aux);
+        }
+    }
+    if(soc_speed.size() == 0){
+        for(int i=0; i<this->d; i++){
+            vector<pair<string, pair<int, int>>> aux;
+            soc_speed.push_back(aux);
+        }
+    }
+
     for (int i = 0; i < p.speed.size(); i++)
     {
-        if (p.speed.size() < 2)
+        if (p.speed[i].size() < 2)
         {
             rand_speed[i] = create_rand_moves(p.atual_position);
 
-            aux_w = w / rand_speed[i].size();
-            aux_c1 = c1 / cog_speed[i].size();
-            aux_c2 = c2 / soc_speed[i].size();
+            aux_w = randomRange(0, static_cast<int>(rand_speed[i].size() - 1) * w);
+            aux_c1 = randomRange(0, static_cast<int>(cog_speed[i].size() - 1) * c1);
+            aux_c2 = randomRange(0, static_cast<int>(soc_speed[i].size() - 1) * c2);
 
-            new_speed[i].insert(new_speed[i].end(), rand_speed[i].begin(), rand_speed[i].begin() + w);
-            new_speed[i].insert(new_speed[i].end(), cog_speed[i].begin(), cog_speed[i].begin() + c1);
-            new_speed[i].insert(new_speed[i].end(), soc_speed[i].begin(), soc_speed[i].begin() + c2);
+            if(rand_speed[i].size() > 0){
+                for(int j=0; j<aux_w; j++){
+                    new_speed[i].push_back(rand_speed[i][j]);
+                }
+                //new_speed[i].insert(new_speed[i].end(), rand_speed[i].begin(), rand_speed[i].begin() + aux_w);
+            }
+            if(cog_speed[i].size() > 0){
+                //new_speed[i].insert(new_speed[i].end(), cog_speed[i].begin(), cog_speed[i].begin() + aux_c1);
+                for(int j=0; j<aux_c1; j++){
+                    new_speed[i].push_back(cog_speed[i][j]);
+                }
+            }
+            if(soc_speed[i].size() > 0){
+                //new_speed[i].insert(new_speed[i].end(), soc_speed[i].begin(), soc_speed[i].begin() + aux_c2);
+                for(int j=0; j<aux_c2; j++){
+                    new_speed[i].push_back(soc_speed[i][j]);
+                }
+            }
+
         }
         else
         {
-            aux_c1 = c1 / cog_speed[i].size();
-            aux_c2 = c2 / soc_speed[i].size();
+            aux_c1 = randomRange(0, static_cast<int>(cog_speed[i].size() - 1) * c1);
+            aux_c2 = randomRange(0, static_cast<int>(soc_speed[i].size() - 1) * c2);
 
             new_speed[i].insert(new_speed[i].end(), cog_speed[i].begin(), cog_speed[i].begin() + c1);
             new_speed[i].insert(new_speed[i].end(), soc_speed[i].begin(), soc_speed[i].begin() + c2);
         }
     }
-
+    //for(int i=0; i<new_speed.size(); i++){
+    //    for(int j=0; j<new_speed[i].size(); j++){
+    //        cout << new_speed[i][j].first << " ";
+    //    }
+    //}
+    //cout << endl;
     return new_speed;
 }
 

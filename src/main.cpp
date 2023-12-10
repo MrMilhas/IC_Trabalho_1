@@ -354,52 +354,52 @@ int main(int argc, char const *argv[])
 
     if (instance_file.is_open())
     {
-        // cout << "-> Arquivo aberto com sucesso!" << endl;
-        // cout << "____________________________________________________" << endl;
+         cout << "-> Arquivo aberto com sucesso!" << endl;
+         cout << "____________________________________________________" << endl;
 
-        // cout << "-> Iniciando construção do grafo..." << endl;
-        // Graph *new_graph = build_graph(instance_file);
+         cout << "-> Iniciando construção do grafo..." << endl;
+         Graph *new_graph = build_graph(instance_file);
 
-        // cout << "-> Grafo construído com sucesso!" << endl;
-        // cout << "____________________________________________________" << endl;
+         cout << "-> Grafo construído com sucesso!" << endl;
+         cout << "____________________________________________________" << endl;
 
-        // cout << "-> Iniciando busca heurística..." << endl;
-        // auto t1 = high_resolution_clock::now();
-        // // Setando a seed para o random
-        // vector<vector<int>> solution = new_graph->randomizedHeuristic(0.15, 100, 42);
-        // auto t2 = high_resolution_clock::now();
+         cout << "-> Iniciando busca heurística..." << endl;
+         auto t1 = high_resolution_clock::now();
+         // Setando a seed para o random
+         vector<vector<int>> solution = new_graph->particle_cloud(20, 5, 0.2, 0.4, 0.6);
+         auto t2 = high_resolution_clock::now();
 
-        // duration<float, std::milli> ms_double = t2 - t1;
+         duration<float, std::milli> ms_double = t2 - t1;
 
-        // cout << "-> Printando solução..." << endl;
-        // cout << "____________________________________________________" << endl;
+         cout << "-> Printando solução..." << endl;
+         cout << "____________________________________________________" << endl;
 
-        // cout << "-> Solução encontrada: " << endl;
-        // float benefit = 0;
-        // float duration = 0;
-        // for (int i = 0; i < solution.size(); i++)
-        // {
-        //     cout << "-> Dia " << i + 1 << ": ";
-        //     for (int j = 0; j < solution[i].size(); j++)
-        //     {
-        //         cout << solution[i][j] << " ";
-        //         if (j != 0)
-        //         {
-        //             benefit += new_graph->get_node(solution[i][j])->points;
-        //             if (j < (solution[i].size() - 2))
-        //             {
-        //                 duration += new_graph->get_node(solution[i][j])->get_edge(solution[i][j + 1])->dist;
-        //             }
-        //         }
-        //     }
-        //     cout << endl;
-        // }
+         cout << "-> Solução encontrada: " << endl;
+         float benefit = 0;
+         float duration = 0;
+         for (int i = 0; i < solution.size(); i++)
+         {
+             cout << "-> Dia " << i + 1 << ": ";
+             for (int j = 0; j < solution[i].size(); j++)
+             {
+                 cout << solution[i][j] << " ";
+                 if (j != 0)
+                 {
+                     benefit += new_graph->get_node(solution[i][j])->points;
+                     if (j < (solution[i].size() - 2))
+                     {
+                         duration += new_graph->get_node(solution[i][j])->get_edge(solution[i][j + 1])->dist;
+                     }
+                 }
+             }
+             cout << endl;
+         }
 
-        // cout << "-> Pontuação total: " << benefit << endl;
-        // cout << "-> Duração total do passeio: " << duration << endl;
-        // cout << "-> Tempo de execução (ms): " << ms_double.count() << endl;
+         cout << "-> Pontuação total: " << benefit << endl;
+         cout << "-> Duração total do passeio: " << duration << endl;
+         cout << "-> Tempo de execução (ms): " << ms_double.count() << endl;
 
-        analiseDados(build_graph(instance_file));
+        //analiseDados(build_graph(instance_file));
     }
     else
     {
