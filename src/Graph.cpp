@@ -907,6 +907,13 @@ vector<vector<int>> Graph::calculate_position(particle p)
                         position[i][p.speed[i][j].second.first] = aux;
                     }
                 }
+
+                if (p.speed[i][j].first == "hotel_swich")
+                {
+                    int aux = position[i][p.speed[i][j].second.second];
+                    position[i][p.speed[i][j].second.second] = position[i][p.speed[i][j].second.first];
+                    position[i][p.speed[i][j].second.first] = aux;
+                }
             }
         }
     }
