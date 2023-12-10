@@ -502,11 +502,11 @@ vector<vector<int>> Graph::simple_grasp()
 
     int it = 0;
 
-    while (it < 300)
+    while (it < 1000)
     {
         vector<pair<int, double>> candidates = this->createCandidates();
         vector<int> hotelsCandidates = this->createHotelsCandidates();
-        int pos = randomRange(0, static_cast<int>(candidates.size() - 1) * 0.5);
+        int pos = randomRange(0, static_cast<int>(candidates.size() - 1) * 0.1);
 
         // if (it == 0)
         //     // cout << "Pos: " << pos << endl;
@@ -531,7 +531,7 @@ vector<vector<int>> Graph::simple_grasp()
             while (t < td[i])
             {
                 // Corrigir aqui: Verificar se a solução do dia atual esta vazia ->
-                pos = randomRange(0, static_cast<int>(candidates.size() - 1) * 0.5);
+                pos = randomRange(0, static_cast<int>(candidates.size() - 1) * 0.1);
                 aux.push_back(candidates.at(pos).first);
                 count_index_aux++;
                 t += this->get_node(aux[count_index_aux - 1])->get_edge(aux[count_index_aux])->dist; // Corrigir a contagem de distância;
