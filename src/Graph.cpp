@@ -489,10 +489,11 @@ vector<vector<int>> Graph::randomizedHeuristic(float alfa, int numIt, int seed)
 
 /**
  * @brief Grasp simples para inicializar as partículas;
- * 
+ *
  * @return vector<vector<int>> Retorna a solução gerada pelo Grasp;
  */
-vector<vector<int>> Graph::simple_grasp (){
+vector<vector<int>> Graph::simple_grasp()
+{
     vector<vector<vector<int>>> solutions;
     vector<vector<int>> solution;
     vector<pair<int, double>> candidates = this->createCandidates();
@@ -566,14 +567,16 @@ vector<vector<int>> Graph::simple_grasp (){
 
 /**
  * @brief Função para inicializar o conjunto de partículas;
- * 
+ *
  * @param n_particles       Número de partículas a serem criadas;
  * @return vector<particle> Retorna o conjunto de partículas;
  */
-vector<particle> Graph::initialize_particles (int n_particles){
+vector<particle> Graph::initialize_particles(int n_particles)
+{
     vector<particle> particles;
 
-    for(int i=0; i<n_particles; i++){
+    for (int i = 0; i < n_particles; i++)
+    {
         //^ Rodar um grasp simples (sem busca local) para cada partícula de forma
         //^ a obter a solução inicial de cada uma;
         particle p;
@@ -586,15 +589,18 @@ vector<particle> Graph::initialize_particles (int n_particles){
 
 /**
  * @brief Função utilizada para calcular a pontuação atual da partícula;
- * 
+ *
  * @param p      Partícula p;
  * @return float Retorna a pontuação da partícula p;
  */
-float Graph::calculate_points (particle p){
+float Graph::calculate_points(particle p)
+{
     float points = 0;
-    
-    for (int i=0; i<p.atual_position.size(); i++){
-        for (int j=0; j<p.atual_position[i].size(); i++){
+
+    for (int i = 0; i < p.atual_position.size(); i++)
+    {
+        for (int j = 0; j < p.atual_position[i].size(); i++)
+        {
             points += this->get_node(p.atual_position[i][j])->points;
         }
     }
@@ -604,34 +610,45 @@ float Graph::calculate_points (particle p){
 
 /**
  * @brief Função para calcular a distância (Hamming) entre duas partículas (p2 - p1);
- * 
+ *
  * @param p1                              Partícula base;
  * @param p2                              Partícula alvo;
  * @return vector<vector<pair<int, int>>> Retorna a velocidade necessária para ir de p1 para p2;
  */
-vector<vector<pair<string, pair<int, int>>>> Graph::subtract_positions (vector<vector<int>> p1, vector<vector<int>> p2){
+vector<vector<pair<string, pair<int, int>>>> Graph::subtract_positions(vector<vector<int>> p1, vector<vector<int>> p2)
+{
     vector<vector<pair<string, pair<int, int>>>> speed;
 
-    for(int i=0; i<p2.size(); i++){
-        if(p2[i].size() > p1[i].size()){
+    for (int i = 0; i < p2.size(); i++)
+    {
+        if (p2[i].size() > p1[i].size())
+        {
             //^ Avalia os nós extras de p2 e cria o movimento "add" para colocar-los em p1 -->
-            for(int j=1; j<p2[i].size()-1; j++){
-                if(!(std::find(p1[i].begin(), p1[i].end(), p2[i][j]) != p1[i].end())) {
+            for (int j = 1; j < p2[i].size() - 1; j++)
+            {
+                if (!(std::find(p1[i].begin(), p1[i].end(), p2[i][j]) != p1[i].end()))
+                {
                     speed[i].push_back(make_pair("add", make_pair(j, p2[i][j])));
-                    p2[i].erase(p2[i].begin()+j); //~ Apaga de p2 os nós extras para p2 e p1 terem o mesmo tamanho;
+                    p2[i].erase(p2[i].begin() + j); //~ Apaga de p2 os nós extras para p2 e p1 terem o mesmo tamanho;
                 }
             }
             //^ Com p1 e p2 do mesmo tamanho, avalia os nós diferentes entre p2 e p1 -->
-            for(int j=1; j<p2[i].size()-1; j++){
+            for (int j = 1; j < p2[i].size() - 1; j++)
+            {
                 //^ Se o nó de p2 não existe em p1, cria o movimento "sub" para substituir o nó de p1 pelo de p2 -->
-                if(p2[i][j] != p1[i][j]){
-                    if(!(std::find(p1[i].begin(), p1[i].end(), p2[i][j]) != p1[i].end())){
+                if (p2[i][j] != p1[i][j])
+                {
+                    if (!(std::find(p1[i].begin(), p1[i].end(), p2[i][j]) != p1[i].end()))
+                    {
                         speed[i].push_back(make_pair("sub", make_pair(j, p2[i][j])));
                     }
                     //^ Se o nó de p2 existem em p1, procura sua posição e cria o movimento "sitwch" para trocar as posições -->
-                    else{
-                        for(int k=1; k<p1[i].size()-1; k++){
-                            if(p1[i][k] == p2[i][j]){
+                    else
+                    {
+                        for (int k = 1; k < p1[i].size() - 1; k++)
+                        {
+                            if (p1[i][k] == p2[i][j])
+                            {
                                 speed[i].push_back(make_pair("swich", make_pair(j, k)));
                             }
                         }
@@ -639,26 +656,36 @@ vector<vector<pair<string, pair<int, int>>>> Graph::subtract_positions (vector<v
                 }
             }
         }
-        else{
-            if(p2[i].size() < p1[i].size()){
+        else
+        {
+            if (p2[i].size() < p1[i].size())
+            {
                 //^ Avalia os nós extras de p1 e cria o movimento "pop" para rmove-los de p1 -->
-                for(int j=1; j<p1[i].size()-1; j++){
-                    if(!(std::find(p2[i].begin(), p2[i].end(), p1[i][j]) != p2[i].end())) {
+                for (int j = 1; j < p1[i].size() - 1; j++)
+                {
+                    if (!(std::find(p2[i].begin(), p2[i].end(), p1[i][j]) != p2[i].end()))
+                    {
                         speed[i].push_back(make_pair("pop", make_pair(j, p1[i][j])));
-                        p1[i].erase(p1[i].begin()+j); //~ Apaga de p1 os nós extras para p2 e p1 terem o mesmo tamanho;
+                        p1[i].erase(p1[i].begin() + j); //~ Apaga de p1 os nós extras para p2 e p1 terem o mesmo tamanho;
                     }
                 }
                 //^ Com p1 e p2 do mesmo tamanho, avalia os nós diferentes entre p2 e p1 -->
-                for(int j=1; j<p2[i].size()-1; j++){
+                for (int j = 1; j < p2[i].size() - 1; j++)
+                {
                     //^ Se o nó de p2 não existe em p1, cria o movimento "sub" para substituir o nó de p1 pelo de p2 -->
-                    if(p2[i][j] != p1[i][j]){
-                        if(!(std::find(p1[i].begin(), p1[i].end(), p2[i][j]) != p1[i].end())){
+                    if (p2[i][j] != p1[i][j])
+                    {
+                        if (!(std::find(p1[i].begin(), p1[i].end(), p2[i][j]) != p1[i].end()))
+                        {
                             speed[i].push_back(make_pair("sub", make_pair(j, p2[i][j])));
                         }
                         //^ Se o nó de p2 existem em p1, procura sua posição e cria o movimento "sitwch" para trocar as posições -->
-                        else{
-                            for(int k=1; k<p1[i].size()-1; k++){
-                                if(p1[i][k] == p2[i][j]){
+                        else
+                        {
+                            for (int k = 1; k < p1[i].size() - 1; k++)
+                            {
+                                if (p1[i][k] == p2[i][j])
+                                {
                                     speed[i].push_back(make_pair("swich", make_pair(j, k)));
                                 }
                             }
@@ -666,18 +693,25 @@ vector<vector<pair<string, pair<int, int>>>> Graph::subtract_positions (vector<v
                     }
                 }
             }
-            else{
+            else
+            {
                 //^ Com p1 e p2 do mesmo tamanho, avalia os nós diferentes entre p2 e p1 -->
-                for(int j=1; j<p2[i].size()-1; j++){
+                for (int j = 1; j < p2[i].size() - 1; j++)
+                {
                     //^ Se o nó de p2 não existe em p1, cria o movimento "sub" para substituir o nó de p1 pelo de p2 -->
-                    if(p2[i][j] != p1[i][j]){
-                        if(!(std::find(p1[i].begin(), p1[i].end(), p2[i][j]) != p1[i].end())){
+                    if (p2[i][j] != p1[i][j])
+                    {
+                        if (!(std::find(p1[i].begin(), p1[i].end(), p2[i][j]) != p1[i].end()))
+                        {
                             speed[i].push_back(make_pair("sub", make_pair(j, p2[i][j])));
                         }
                         //^ Se o nó de p2 existem em p1, procura sua posição e cria o movimento "sitwch" para trocar as posições -->
-                        else{
-                            for(int k=1; k<p1[i].size()-1; k++){
-                                if(p1[i][k] == p2[i][j]){
+                        else
+                        {
+                            for (int k = 1; k < p1[i].size() - 1; k++)
+                            {
+                                if (p1[i][k] == p2[i][j])
+                                {
                                     speed[i].push_back(make_pair("swich", make_pair(j, k)));
                                 }
                             }
@@ -693,53 +727,143 @@ vector<vector<pair<string, pair<int, int>>>> Graph::subtract_positions (vector<v
 
 /**
  * @brief Função aleatória que definirá se uma componente será usada ou não na iteração atual;
- * 
+ *
  * @return int Retorna 1 ou 0;
  */
-int rand (){
+int rand()
+{
     int state;
-    
+
     return state;
+}
+
+vector<pair<string, pair<int, int>>> Graph::create_rand_moves(const vector<vector<int>> &current_solution)
+{
+    vector<pair<string, pair<int, int>>> rand_moves;
+
+    // Define a probabilidade de cada tipo de movimento
+    float prob_add = 0.2;         // Probabilidade de adicionar um nó
+    float prob_pop = 0.2;         // Probabilidade de remover um nó
+    float prob_sub = 0.2;         // Probabilidade de substituir um nó
+    float prob_swich = 0.2;       // Probabilidade de trocar a posição de dois nós
+    float prob_hotel_swich = 0.2; // Probabilidade de trocar a posição de dois hotéis
+
+    // Itera sobre a solução para criar movimentos aleatórios
+    for (int day = 0; day < current_solution.size(); day++)
+    {
+        vector<int> current_route = current_solution[day];
+
+        for (int i = 1; i < current_route.size() - 1; i++)
+        {
+            float rand_prob = ((float)rand() / RAND_MAX); // Gera um número aleatório entre 0 e 1
+
+            if (rand_prob < prob_add)
+            {
+                // Adiciona um nó aleatório
+                int node_to_add = getRandomNode();
+                rand_moves.push_back(make_pair("add", make_pair(i, node_to_add)));
+            }
+            else if (rand_prob < prob_add + prob_pop)
+            {
+                // Remove o nó atual
+                rand_moves.push_back(make_pair("pop", make_pair(i, current_route[i])));
+            }
+            else if (rand_prob < prob_add + prob_pop + prob_sub)
+            {
+                // Substitui o nó atual por outro nó aleatório
+                int node_to_sub = getRandomNode();
+                rand_moves.push_back(make_pair("sub", make_pair(i, node_to_sub)));
+            }
+            else if (rand_prob < prob_add + prob_pop + prob_sub + prob_swich)
+            {
+                // Troca a posição do nó atual com outro nó aleatório
+                int node_to_swich = getRandomNode();
+                rand_moves.push_back(make_pair("swich", make_pair(i, node_to_swich)));
+            }
+            else if (rand_prob < prob_add + prob_pop + prob_sub + prob_swich + prob_hotel_swich)
+            {
+                // Troca a posição de dois hotéis
+                int hotel_node_1 = getRandomHotelNode(current_solution);
+                int hotel_node_2 = getRandomHotelNode(current_solution);
+                rand_moves.push_back(make_pair("hotel_swich", make_pair(hotel_node_1, hotel_node_2)));
+            }
+        }
+    }
+
+    return rand_moves;
+}
+
+int Graph::getRandomHotelNode(vector<vector<int>> current_route)
+{
+    // Pega todos os hotéis candidatos
+    vector<int> candidatesHotels = this->createHotelsCandidates();
+
+    // Remove os hotéis que já estão na rota atual exceto o primeiro hotel do primeiro dia e o último hotel do último dia
+    for (int day = 0; day < current_route.size(); day++)
+    {
+        vector<int> current_day = current_route[day];
+
+        for (int i = 1; i < current_day.size() - 1; i++)
+        {
+            candidatesHotels.erase(remove(candidatesHotels.begin(), candidatesHotels.end(), current_day[i]), candidatesHotels.end());
+        }
+    }
+
+    // Retorna um hotel aleatório
+    int rand_hotel = rand() % (candidatesHotels.size() - 1);
+
+    return candidatesHotels[rand_hotel];
+}
+
+int Graph::getRandomNode()
+{
+    // Retorna o ID de um nó aleatório
+    int rand_node = rand() % (order - 2) + 2; // Garante que o nó aleatório não seja um hotel
+    return rand_node;
 }
 
 /**
  * @brief Função para calcular a velocidade da partícula;
- * 
+ *
  * @param p                               Partícula que irá atualizar sua velocidade;
  * @param w                               Coeficiente de inércia;
  * @param c1                              Componente cognitiva;
  * @param c2                              Componente social;
  * @return vector<vector<pair<int, int>>> Retorna a nova velocidade da partícula;
  */
-vector<vector<pair<string, pair<int, int>>>> Graph::calculate_speed (particle p, float w, float c1, float c2){
+vector<vector<pair<string, pair<int, int>>>> Graph::calculate_speed(particle p, float w, float c1, float c2)
+{
     vector<vector<pair<string, pair<int, int>>>> new_speed;
 
     int aux_w;
     int aux_c1;
     int aux_c2;
-    
+
     vector<vector<pair<string, pair<int, int>>>> rand_speed;
     vector<vector<pair<string, pair<int, int>>>> cog_speed = subtract_positions(p.atual_position, p.best_local_position);
     vector<vector<pair<string, pair<int, int>>>> soc_speed = subtract_positions(p.atual_position, p.best_global_position);
 
-    for(int i=0; i<p.speed.size(); i++){
-        if(p.speed.size() < 2){
-            rand_speed[i] = create_rand_moves();
-            
+    for (int i = 0; i < p.speed.size(); i++)
+    {
+        if (p.speed.size() < 2)
+        {
+            rand_speed[i] = create_rand_moves(p.atual_position);
+
             aux_w = w / rand_speed[i].size();
             aux_c1 = c1 / cog_speed[i].size();
             aux_c2 = c2 / soc_speed[i].size();
 
-            new_speed[i].insert( new_speed[i].end(), rand_speed[i].begin(), rand_speed[i].begin() + w);
-            new_speed[i].insert( new_speed[i].end(), cog_speed[i].begin(), cog_speed[i].begin() + c1);
-            new_speed[i].insert( new_speed[i].end(), soc_speed[i].begin(), soc_speed[i].begin() + c2);
+            new_speed[i].insert(new_speed[i].end(), rand_speed[i].begin(), rand_speed[i].begin() + w);
+            new_speed[i].insert(new_speed[i].end(), cog_speed[i].begin(), cog_speed[i].begin() + c1);
+            new_speed[i].insert(new_speed[i].end(), soc_speed[i].begin(), soc_speed[i].begin() + c2);
         }
-        else{
+        else
+        {
             aux_c1 = c1 / cog_speed[i].size();
             aux_c2 = c2 / soc_speed[i].size();
 
-            new_speed[i].insert( new_speed[i].end(), cog_speed[i].begin(), cog_speed[i].begin() + c1);
-            new_speed[i].insert( new_speed[i].end(), soc_speed[i].begin(), soc_speed[i].begin() + c2);
+            new_speed[i].insert(new_speed[i].end(), cog_speed[i].begin(), cog_speed[i].begin() + c1);
+            new_speed[i].insert(new_speed[i].end(), soc_speed[i].begin(), soc_speed[i].begin() + c2);
         }
     }
 
@@ -748,27 +872,36 @@ vector<vector<pair<string, pair<int, int>>>> Graph::calculate_speed (particle p,
 
 /**
  * @brief Função utilizada para atualizar a posição da partícula;
- * 
+ *
  * @param p                    Partícula;
  * @return vector<vector<int>> Retorna a posição calculada da partícula;
  */
-vector<vector<int>> Graph::calculate_position (particle p){
+vector<vector<int>> Graph::calculate_position(particle p)
+{
     vector<vector<int>> position = p.atual_position;
 
-    for(int i=0; i<p.speed.size(); i++){
-        for(int j=0; j<p.speed[i].size(); j++){
-            if(p.speed[i][j].first == "add"){
-                position[i].insert(position[i].begin()+p.speed[i][j].second.first, p.speed[i][j].second.second);
+    for (int i = 0; i < p.speed.size(); i++)
+    {
+        for (int j = 0; j < p.speed[i].size(); j++)
+        {
+            if (p.speed[i][j].first == "add")
+            {
+                position[i].insert(position[i].begin() + p.speed[i][j].second.first, p.speed[i][j].second.second);
             }
-            else{
-                if(p.speed[i][j].first == "pop"){
-                    position[i].erase(position[i].begin()+p.speed[i][j].second.first);
+            else
+            {
+                if (p.speed[i][j].first == "pop")
+                {
+                    position[i].erase(position[i].begin() + p.speed[i][j].second.first);
                 }
-                else{
-                    if(p.speed[i][j].first == "sub"){
+                else
+                {
+                    if (p.speed[i][j].first == "sub")
+                    {
                         position[i][p.speed[i][j].second.first] = p.speed[i][j].second.second;
                     }
-                    else{
+                    else
+                    {
                         int aux = position[i][p.speed[i][j].second.second];
                         position[i][p.speed[i][j].second.second] = position[i][p.speed[i][j].second.first];
                         position[i][p.speed[i][j].second.first] = aux;
@@ -779,43 +912,50 @@ vector<vector<int>> Graph::calculate_position (particle p){
     }
 
     //^ Otimizar a seleção de hotéis aqui nesta função;
-    
+
     return position;
 }
 
-vector<vector<int>> Graph::particle_cloud (int max_it, int n_particles, float w, float c1, float c2){
+vector<vector<int>> Graph::particle_cloud(int max_it, int n_particles, float w, float c1, float c2)
+{
     //^ ETAPA 0: Inicializar variáveis globais ==>
-    float best_global_points = -999;           //& Melhor pontuação global;
-    vector<vector<int>> best_global_position;  //& Melhor posição global;
-    
+    float best_global_points = -999;          //& Melhor pontuação global;
+    vector<vector<int>> best_global_position; //& Melhor posição global;
+
     //^ ETAPA 1: Inicializar as partículas ==>
-    vector<particle> particles = initialize_particles(n_particles);  //& Conjunto de partículas;
+    vector<particle> particles = initialize_particles(n_particles); //& Conjunto de partículas;
 
     //^ ETAPA 2: Executar iterações do algoritmo ==>
-    for (int i=0; i<max_it; i++){
+    for (int i = 0; i < max_it; i++)
+    {
         //^ 2.1: Atualizar pontuações das partículas -->
-        for (int j=0; j<particles.size(); j++){
+        for (int j = 0; j < particles.size(); j++)
+        {
             particles[j].points = calculate_points(particles[j]);
 
-            if(particles[j].points > particles[j].best_local_points){
+            if (particles[j].points > particles[j].best_local_points)
+            {
                 particles[j].best_local_points = particles[j].points;
                 particles[j].best_local_position = particles[j].atual_position;
             }
         }
 
         //^ 2.2: Atualizar melhor pontuação global -->
-        for (int j=0; j<particles.size(); j++){
-            if(particles[j].best_local_points > best_global_points){
+        for (int j = 0; j < particles.size(); j++)
+        {
+            if (particles[j].best_local_points > best_global_points)
+            {
                 best_global_points = particles[j].best_local_points;
                 best_global_position = particles[j].best_local_position;
-                
+
                 particles[j].best_global_points = best_global_points;
                 particles[j].best_global_position = best_global_position;
             }
         }
 
         //^ 2.3: Atualizar velocidades e calcular posições -->
-        for (int j=0; j<particles.size(); j++){
+        for (int j = 0; j < particles.size(); j++)
+        {
             particles[j].speed = calculate_speed(particles[j], w, c1, c2);
             particles[j].atual_position = calculate_position(particles[j]);
         }
