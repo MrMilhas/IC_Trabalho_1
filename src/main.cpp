@@ -251,7 +251,8 @@ void analiseDados(Graph *new_graph)
             // Executar o algoritmo randomizado
             auto t1 = std::chrono::high_resolution_clock::now();
             // Substitua os argumentos abaixo pelos valores desejados
-            std::vector<std::vector<int>> solution = new_graph->randomizedHeuristic(alpha, num_iterations, 42);
+            //std::vector<std::vector<int>> solution = new_graph->randomizedHeuristic(alpha, num_iterations, 42);
+            std::vector<std::vector<int>> solution = new_graph->particle_cloud(2000, 5, 0.2, 0.3, 0.8);
             auto t2 = std::chrono::high_resolution_clock::now();
 
             // Calcular a pontuação e a duração do passeio

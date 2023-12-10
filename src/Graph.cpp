@@ -599,7 +599,7 @@ float Graph::calculate_points(particle p)
 
     for (int i = 0; i < p.atual_position.size(); i++)
     {
-        for (int j = 0; j < p.atual_position[i].size(); i++)
+        for (int j = 0; j < p.atual_position[i].size(); j++)
         {
             points += this->get_node(p.atual_position[i][j])->points;
         }
@@ -931,7 +931,7 @@ vector<vector<int>> Graph::particle_cloud(int max_it, int n_particles, float w, 
 
     //^ ETAPA 1: Inicializar as partículas ==>
     vector<particle> particles = initialize_particles(n_particles); //& Conjunto de partículas;
-
+    
     //^ ETAPA 2: Executar iterações do algoritmo ==>
     for (int i = 0; i < max_it; i++)
     {
